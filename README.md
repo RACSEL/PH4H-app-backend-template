@@ -1,4 +1,4 @@
-# PH4H PH4H Backend
+# PH4H App Backend
 
 Template for backend for the IPS PH4H App. A unified health app for Connectathon users to view, merge, and share IPS data
 securely cross-border. This project provides a backend system composed of the IPS PH4H API for handling business logic and
