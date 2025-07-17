@@ -1,0 +1,11 @@
+host: localhost:8091
+info:
+  contact: {}
+  description: This is the official API for Lacpass mobile app.
+  title: Lacpass App API
+  version: "0.1"
+paths: {}
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"

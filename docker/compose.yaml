@@ -1,0 +1,107 @@
+services:
+  lacpass-backend:
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile
+    container_name: lacpass-backend
+    image: ips-backend
+    networks:
+      - backend
+    env_file:
+      - ../.env
+    environment:
+      API_PORT: ${API_PORT:-3000}
+      AUTH_INTERNAL_URL: ${AUTH_INTERNAL_URL:-http://auth:8080}
+      AUTH_HOSTNAME: ${AUTH_URL:-http://localhost:9083}
+      AUTH_REALM: ${AUTH_REALM:-lacpass}
+      AUTH_CLIENT_ID: ${AUTH_CLIENT_ID:-admin-cli}
+      # Need to set this after creating a client for Keycloak Admin API access, using service account
+      AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET:-bbU4vnqhqe2AJ32XpdQVRVqfRMA82Hnu}
+      AUTH_EMAIL_REDIRECT_URI: ${AUTH_EMAIL_REDIRECT_URI:-ph4happ://open/validated-email}
+      AUTH_EMAIL_CLIENT_ID: ${AUTH_EMAIL_CLIENT_ID:-app}
+      FHIR_BASE_URL: ${FHIR_BASE_URL:-http://lacpass.create.cl:8080}
+      VHL_BASE_URL: ${VHL_BASE_URL:-http://lacpass.create.cl:8182}
+      API_SWAGGER: ${API_SWAGGER:-true}
+    ports:
+      - "9081:3000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      auth:
+        condition: service_healthy
+
+  auth:
+    image: bitnami/keycloak:26.2.5
+    container_name: auth
+    env_file:
+      - ../.env
+    volumes:
+      - ../config/keycloak:/opt/bitnami/keycloak/data/import
+    environment:
+      KEYCLOAK_HOSTNAME: ${KEYCLOAK_HOSTNAME:-http://localhost:9083}
+      KC_HTTP_PORT: 8080
+      KC_CACHE: local
+      KEYCLOAK_ADMIN_USER: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
+      KEYCLOAK_DATABASE_HOST: auth-db
+      KEYCLOAK_DATABASE_PORT: 5432
+      KEYCLOAK_DATABASE_NAME: ${POSTGRES_DB:-keycloak}
+      KEYCLOAK_DATABASE_USER: ${POSTGRES_USER:-keycloak}
+      KEYCLOAK_DATABASE_PASSWORD: ${POSTGRES_PASS:-p@ssw0rd}
+      KEYCLOAK_ENABLE_HEALTH_ENDPOINTS: true
+      KEYCLOAK_EXTRA_ARGS: --import-realm
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "9083:8080"
+    networks:
+      - backend
+      - auth
+    depends_on:
+      auth-db:
+        condition: service_healthy
+
+  auth-db:
+    image: postgres:17.5-alpine
+    container_name: auth-db
+    volumes:
+      - auth-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-keycloak}
+      POSTGRES_USER: ${POSTGRES_USER:-keycloak}
+      POSTGRES_PASSWORD: ${POSTGRES_PASS:-p@ssw0rd}
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-keycloak} -d ${POSTGRES_DB:-keycloak} -h localhost",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - auth
+
+  mailcatcher:
+    image: haravich/fake-smtp-server:20250615
+    container_name: mailcatcher
+    platform: "linux/amd64"
+    ports:
+      - "25:1025"
+      - "9082:1080"
+    networks:
+      - auth
+
+volumes:
+  auth-data:
+
+networks:
+  auth:
+  backend:

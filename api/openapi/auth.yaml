@@ -1,0 +1,354 @@
+openapi: 3.1.0
+info:
+  title: Lacpass Authentication Server
+  description: Authentication endpoints
+  version: 1.0.0
+
+servers:
+  - url: 'http://localhost:8082'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "Access token obtained via the Token endpoint."
+  schemas:
+    Account:
+      type: object
+      properties:
+        username:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        emailVerified:
+          type: boolean
+        attributes:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+    UserRepresentation:
+      type: object
+      description: "Represents the current user's profile."
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: "User's ID."
+        username:
+          type: string
+          description: "User's username."
+        firstName:
+          type: string
+          description: "User's first name."
+        lastName:
+          type: string
+          description: "User's last name."
+        email:
+          type: string
+          format: email
+          description: "User's email address."
+        emailVerified:
+          type: boolean
+          readOnly: true
+          description: "Indicates if the user's email has been verified."
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+          description: "A map of custom user attributes."
+    SessionRepresentation:
+      type: object
+      description: "Represents an active user session."
+      properties:
+        id:
+          type: string
+          description: "Session ID."
+        ipAddress:
+          type: string
+          description: "IP address from which the session was initiated."
+        started:
+          type: integer
+          format: int64
+          description: "Timestamp of when the session started."
+        lastAccess:
+          type: integer
+          format: int64
+          description: "Timestamp of the last access in this session."
+        current:
+          type: boolean
+          description: "Indicates if this is the current session"
+        browser:
+          type: string
+          description: "Browser or user agent."
+        os:
+          type: string
+          description: "Operating system."
+    Error:
+      type: object
+      description: "Error"
+      properties:
+        error:
+          type: string
+          description: "Error type"
+          examples: ["invalid_request"]
+        error_description:
+          type: string
+          description: "Error description"
+          examples: ["Missing form parameter: grant_type"]
+  examples:
+    InvalidRequestError:
+      value:
+        error: "invalid_request"
+        error_description: "Missing form parameter: grant_type"
+      summary: "Invalid request"
+    InvalidUserCredentialsError:
+      value:
+        error: "invalid_grant"
+        error_description: "Invalid user credentials"
+      summary: "Invalid user credentials"
+    MaximumRefreshTokenUsesExceeded:
+      value:
+        error: "invalid_grant"
+        error_description: "Maximum allowed refresh token reuse exceeded"
+      summary: "Maximum allowed refresh token reuse exceeded"
+
+
+# Group the endpoints into logical tabs.
+tags:
+  - name: Authentication
+    description: "Endpoints for user authentication (OpenID Connect)."
+  - name: User
+    description: "Endpoints for user account"
+
+paths:
+  /realms/{realm}/protocol/openid-connect/token:
+    post:
+      tags:
+        - Authentication
+      summary: "Get Token"
+      description: "Exchanges user credentials for an access and refresh tokens"
+      parameters:
+        - name: realm
+          in: path
+          required: true
+          schema:
+            type: string
+            examples: ["lacpass"]
+          description: "Name of the realm."
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                grant_type:
+                  description: "Can be either `password` or `refresh_token`."
+                  type: string
+                  enum:
+                    - password
+                    - refresh_token
+                  examples: ["password", "refresh_token"]
+                client_id:
+                  description: "The ID of the client application."
+                  type: string
+                  enum:
+                    - app
+                  examples: ["app"]
+                refresh_token:
+                  description: "Refresh token when `grant_type` refresh_token is used."
+                  type: string
+                  example: "eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI1ZjA5MWRkYy1kNDQ3LTQ0OGYtODBmOS01NDUyYmRiMjM0ZjQifQ.eyJleHAiOjE3NTAxNzc3OTYsImlhdCI6MTc1MDA5MTM5NiwianRpIjoiNWJiMDNkMWQtYmY2Yy00MDZjLWI5NTktYmMzMjY4NjY3MjJlIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgyL3JlYWxtcy9sYWNwYXNzIiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgyL3JlYWxtcy9sYWNwYXNzIiwic3ViIjoiNjYwMWIzMjYtOTU5Yi00ZWNkLTliOGMtYTkzNThkNjAxYzRhIiwidHlwIjoiUmVmcmVzaCIsImF6cCI6ImFwcCIsInNpZCI6IjRiODM5OWU3LTNjYzUtNDJjZi1hNTJhLWY3MmZkOTE1MGM0MyIsInNjb3BlIjoid2ViLW9yaWdpbnMgYmFzaWMgcHJvZmlsZSByb2xlcyBlbWFpbCBhY3IiLCJyZXVzZV9pZCI6IjZmNDRkMTkzLWQwODQtNGU5Yi1iMWY1LWNkNTI1OWQyZWY5NiJ9.8yv3KVAyiBNQ2q9rcO0_oHdEBfQ5eJfRLVoCsYRCQsLMwfdV9Jc4NOmIXc337artKwY8c6k0_1ILhud-STPuJg"
+                  required: false
+                username:
+                  type: string
+                  description: "User's email. Required when `grant_type` is password."
+                  examples: ["jdoe@example.com"]
+                  required: false
+                password:
+                  type: string
+                  description: "User's password. Required when `grant_type` is password."
+                  examples: ["secret-password"]
+                  required: false
+                scope:
+                  type: string
+                  description: "The scopes being requested. `openid` scope should always be present"
+                  examples: ["openid profile email"]
+                  required: false
+      responses:
+        '200':
+          description: "Authentication successful."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30"
+                  refresh_token:
+                    type: string
+                    example: "pvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30"
+                  not-before-policy:
+                    type: integer
+                    example: 0
+                  session_state:
+                    type: string
+                    example: "9c238c37-1021-43b3-a122-67301500a61d"
+                  scope:
+                    type: string
+                    example: "profile email"
+                  expires_in:
+                    type: integer
+                    example: 123058381
+                  refresh_expires_in:
+                    type: integer
+                    example: 181283903
+                  token_type:
+                    type: string
+                    example: "Bearer"
+        '401':
+          description: "Bad Request - a required parameter is missing or invalid."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalidRequest:
+                  $ref: '#/components/examples/InvalidRequestError'
+                invalidUserCredentials:
+                  $ref: '#/components/examples/InvalidUserCredentialsError'
+                MaximumRefreshTokenUsesExceeded:
+                  $ref: '#/components/examples/MaximumRefreshTokenUsesExceeded'
+  /realms/{realm}/protocol/openid-connect/logout:
+    post:
+      tags:
+        - Authentication
+      summary: "Log Out"
+      description: "Logs the user out of their session. Requires the refresh token to fully invalidate the session."
+      parameters:
+        - name: realm
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The name of the realm."
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                client_id:
+                  type: string
+                  description: "The ID of the client application."
+                  examples: ["my-app-client"]
+                refresh_token:
+                  type: string
+                  description: "The refresh token obtained during login."
+      responses:
+        '204':
+          description: "Logout successful."
+  /realms/{realm}/protocol/openid-connect/userinfo:
+    get:
+      summary: "Get User Information"
+      description: "This endpoint returns claims about the authenticated end-user."
+      tags:
+        - User
+      parameters:
+        - name: realm
+          in: path
+          required: true
+          description: "The name of the realm."
+          schema:
+            type: string
+      security:
+        - bearerAuth: [ ]
+      responses:
+        "200":
+          description: "Successful response with user resource."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sub:
+                    type: string
+                    description: "User's id on the realm."
+                  name:
+                    type: string
+                    description: "Full name."
+                  given_name:
+                    type: string
+                    description: "Given name or first name."
+                  family_name:
+                    type: string
+                    description: "Surname or last name."
+                  preferred_username:
+                    type: string
+                    description: "Preferred username."
+                  email:
+                    type: string
+                    format: email
+                    description: "E-mail address."
+                  email_verified:
+                    type: boolean
+                    description: "Indicates if the user's email has been verified."
+                  locale:
+                    type: string
+                    description: "Preferred language."
+                  document_type:
+                    type: string
+                    description: "Identity document type"
+                    enum:
+                      - passport
+                      - id
+                  identifier:
+                    type: string
+                    description: "Document identifier"
+              example:
+                sub: "a8c6d49a-72c7-4402-a1b1-7a5e9f8b4d6c"
+                name: "John Doe"
+                given_name: "John"
+                family_name: "Doe"
+                preferred_username: "jdoe"
+                email: "johndoe@example.com"
+                email_verified: true
+                locale: "en"
+                document_type: "passport"
+                identifier: "F12345678"
+
+        "401":
+          description: "Unauthorized. The request is missing a valid bearer token."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "unauthorized"
+                  error_description:
+                    type: string
+                    example: "Bearer token not provided or is invalid."
+        "403":
+          description: "Forbidden. The provided token does not have the required permissions (e.g., missing 'openid' scope)."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "insufficient_scope"
+                  error_description:
+                    type: string
+                    example: "The 'openid' scope is required."

@@ -1,0 +1,215 @@
+openapi: 3.1.0
+info:
+  title: IPS Lacpass
+  description: IPS Lacpass
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8081'
+paths:
+  /users:
+    post:
+      summary: "Register a new user"
+      description: "Register a new user in the realm. It will send a confirmation email to the user."
+      tags:
+        - User
+      requestBody:
+        description: "User registration details"
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: The email address for the new account.
+                  example: john.doe@example.com
+                password:
+                  type: string
+                  format: password
+                  description: The password for the new account.
+                  example: MySuperSecurePassword123!
+                password-confirm:
+                  type: string
+                  format: password
+                  description: Confirmation of the password. Must match 'password'.
+                  example: MySuperSecurePassword123!
+                firstName:
+                  type: string
+                  description: (Optional) The first name of the user.
+                  example: John
+                lastName:
+                  type: string
+                  description: (Optional) The last name of the user.
+                  example: Doe
+                locale:
+                  type: string
+                  description: "Preferred language."
+                  enum:
+                    - en
+                    - es
+                    - pt-br
+                  example: en
+                document_type:
+                  type: string
+                  description: "Identity document type"
+                  enum:
+                    - passport
+                    - id
+                  example: passport
+                identifier:
+                  type: string
+                  description: "Document identifier"
+                  example: F12345678
+              required:
+                - username
+                - email
+                - password
+                - password-confirm
+                - locale
+                - document_type
+                - identifier
+      responses:
+        "200":
+          description: "Successful registration. The user will get a confirmation e-mail."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sub:
+                    type: string
+                    description: "User's id on the realm."
+                  name:
+                    type: string
+                    description: "Full name."
+                  given_name:
+                    type: string
+                    description: "Given name or first name."
+                  family_name:
+                    type: string
+                    description: "Surname or last name."
+                  preferred_username:
+                    type: string
+                    description: "Preferred username."
+                  email:
+                    type: string
+                    format: email
+                    description: "E-mail address."
+                  email_verified:
+                    type: boolean
+                    description: "Indicates if the user's email has been verified."
+                  locale:
+                    type: string
+                    description: "Preferred language."
+                  document_type:
+                    type: string
+                    description: "Identity document type"
+                    enum:
+                      - passport
+                      - id
+                  identifier:
+                    type: string
+                    description: "Document identifier"
+              example:
+                sub: "a8c6d49a-72c7-4402-a1b1-7a5e9f8b4d6c"
+                name: "John Doe"
+                given_name: "John"
+                family_name: "Doe"
+                preferred_username: "jdoe"
+                email: "johndoe@example.com"
+                email_verified: false
+                locale: "en"
+                document_type: "passport"
+                identifier: "F12345678"
+        "400":
+          description: "The request is malformed or missing required fields."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    error:
+                      type: string
+                    error_description:
+                      type: string
+                  required:
+                    - error
+                    - error_description
+              examples:
+                MissingUsername:
+                  value:
+                  - error: "missing_username"
+                    error_description: "Missing required field: username"
+                MissingEmail:
+                  value:
+                  - error: "missing_email"
+                    error_description: "Missing required field: email"
+                MissingPassword:
+                  value:
+                  - error: "missing_password"
+                    error_description: "Missing required field: password"
+                MissingPasswordConfirmation:
+                  value:
+                  - error: "missing_password_confirmation"
+                    error_description: "Missing required field: password-confirm"
+                MissingLocale:
+                  value:
+                  - error: "missing_locale"
+                    error_description: "Missing required field: locale"
+                MissingDocumentType:
+                  value:
+                  - error: "missing_document_type"
+                    error_description: "Missing required field: document_type"
+                MissingIdentifier:
+                  value:
+                  - error: "missing_identifier"
+                    error_description: "Missing required field: identifier"
+                InvalidDocumentType:
+                  value:
+                  - error: "invalid_document_type"
+                    error_description: "Invalid document type. Must be either 'passport' or 'id'."
+                InvalidIdentifierFormat:
+                  value:
+                  - error: "invalid_identifier_format"
+                    error_description: "Invalid identifier format."
+                InvalidEmailFormat:
+                  value:
+                  - error: "invalid_email_format"
+                    error_description: "Invalid email format"
+                PasswordMismatch:
+                  value:
+                  - error: "password_mismatch"
+                    error_description: "Password and password confirmation do not match"
+                InvalidPasswordMinLength:
+                  value:
+                  - error: "invalid_password_min_length_message"
+                    error_description: "Invalid password: minimum length <number>"
+                InvalidPasswordMaxLength:
+                  value:
+                  - error: "invalid_password_max_length_message"
+                    error_description: "Invalid password: maximum length <number>"
+        "409":
+          description: "The request is malformed or missing required fields."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    error:
+                      type: string
+                    error_description:
+                      type: string
+                  required:
+                    - error
+                    - error_description
+              examples:
+                DuplicateUser:
+                  value:
+                    - error: "user_already_exists"
+                      error_description: "User already exists"

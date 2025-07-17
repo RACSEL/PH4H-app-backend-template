@@ -1,0 +1,16 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is the official API for Lacpass mobile app.",
+        "title": "Lacpass App API",
+        "contact": {},
+        "version": "0.1"
+    },
+    "host": "localhost:8091",
+    "paths": {},
+    "securityDefinitions": {
+        "BasicAuth": {
+            "type": "basic"
+        }
+    }
+}

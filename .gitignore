@@ -1,0 +1,14 @@
+.env
+.idea
+
+temp/*
+tmp/*
+*.exe
+mock_*
+content-generator
+*.tfvars
+.terraform
+.terraform.lock.hcl
+templates
+out
+debugger
