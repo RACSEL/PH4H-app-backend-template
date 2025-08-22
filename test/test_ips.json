@@ -1,0 +1,258 @@
+{
+  "resourceType": "Bundle",
+  "signature": {
+    "data": "MEQCIBcX/Ne1VY92x6w+NXaCoPPC7qV73PFswrU/z6Gb+cIMAiBYp/kjDBjJjwZEOOtlOzV2Gf9U34bFqGr6/MzNuHo7EA==",
+    "type": [
+      {
+        "code": "1.2.840.10065.1.12.1.5",
+        "system": "urn:iso-astm:E1762-95:2013"
+      }
+    ],
+    "when": "2024-09-09T14:07:12.970Z",
+    "who": {
+      "identifier": {
+        "value": "LACPass"
+      }
+    }
+  },
+  "id": "ips-example-comprehensive",
+  "identifier": {
+    "system": "urn:ietf:rfc:4122",
+    "value": "1"
+  },
+  "meta": {
+    "profile": ["http://hl7.org/fhir/uv/ips/StructureDefinition/Bundle-ips"]
+  },
+  "type": "document",
+  "timestamp": "2025-08-02T09:38:15Z",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:0d648439-91a9-425b-8660-b084b5c7774d",
+      "resource": {
+        "resourceType": "Composition",
+        "id": "ips-composition",
+        "status": "final",
+        "type": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "60591-5",
+              "display": "Patient summary Document"
+            }
+          ]
+        },
+        "subject": { "reference": "urn:uuid:ab5b5333-5735-4299-a86d-375b3648115a" },
+        "date": "2025-08-02T09:38:15Z",
+        "author": [{ "reference": "urn:uuid:1e345678-90ab-cdef-1234-567890abcdef" }],
+        "title": "International Patient Summary for Jane Doe",
+        "section": [
+          {
+            "title": "Allergies and Intolerances",
+            "code": { "coding": [{ "system": "http://loinc.org", "code": "48765-2" }] },
+            "entry": [{ "reference": "urn:uuid:2b1f8c8e-5b23-44b8-b5e1-a9d9b6d8f3e5" }]
+          },
+          {
+            "title": "Medication Summary",
+            "code": { "coding": [{ "system": "http://loinc.org", "code": "10160-0" }] },
+            "entry": [{ "reference": "urn:uuid:3c2g7d7d-6c34-55c9-c6f2-b0e0c7e9g4f6" }]
+          },
+          {
+            "title": "Problem List",
+            "code": { "coding": [{ "system": "http://loinc.org", "code": "11450-4" }] },
+            "entry": [{ "reference": "urn:uuid:4d3h6e6e-7d45-66d0-d7g3-c1f1d8f0h5g7" }]
+          },
+          {
+            "title": "Immunizations",
+            "code": { "coding": [{ "system": "http://loinc.org", "code": "11369-6" }] },
+            "entry": [{ "reference": "urn:uuid:5e4i5f5f-8e56-77e1-e8h4-d2g2e9g1i6h8" }]
+          },
+          {
+            "title": "History of Procedures",
+            "code": { "coding": [{ "system": "http://loinc.org", "code": "47519-4" }] },
+            "entry": [{ "reference": "urn:uuid:6f5j4g4g-9f67-88f2-f9i5-e3h3f0h2j7i9" }]
+          },
+          {
+            "title": "Medical Devices",
+            "code": { "coding": [{ "system": "http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips", "code": "medication-and-device-use" }] },
+            "entry": [{ "reference": "urn:uuid:7g6k3h3h-0g78-99g3-g0j6-f4i4g1i3k8j0" }]
+          },
+          {
+            "title": "Diagnostic Results",
+            "code": { "coding": [{ "system": "http://loinc.org", "code": "30954-2" }] },
+            "entry": [{ "reference": "urn:uuid:8h7l2i2i-1h89-00h4-h1k7-g5j5h2j4l9k1" }]
+          },
+          {
+            "title": "Vital Signs",
+            "code": { "coding": [{ "system": "http://loinc.org", "code": "8716-3" }] },
+            "entry": [{ "reference": "urn:uuid:9i8m1j1j-2i90-11i5-i2l8-h6k6i3k5m0l2" }]
+          },
+          {
+            "title": "Past History of Illness",
+            "code": { "coding": [{ "system": "http://loinc.org", "code": "11348-0" }] },
+            "entry": [{ "reference": "urn:uuid:a1b2c3d4-e5f6-7890-1234-567890abcdef" }]
+          },
+          {
+            "title": "Pregnancy Status",
+            "code": { "coding": [{ "system": "http://loinc.org", "code": "82810-3" }] },
+            "entry": [{ "reference": "urn:uuid:b2c3d4e5-f6a7-8901-2345-67890abcdef1" }]
+          },
+          {
+            "title": "Social History",
+            "code": { "coding": [{ "system": "http://loinc.org", "code": "29762-2" }] },
+            "entry": [{ "reference": "urn:uuid:c3d4e5f6-a7b8-9012-3456-7890abcdef12" }]
+          },
+          {
+            "title": "Advance Directives",
+            "code": { "coding": [{ "system": "http://loinc.org", "code": "42348-3" }] },
+            "entry": [{ "reference": "urn:uuid:d4e5f6a7-b8c9-0123-4567-890abcdef123" }]
+          },
+          {
+            "title": "Functional Status",
+            "code": { "coding": [{ "system": "http://loinc.org", "code": "47420-5" }] },
+            "entry": [{ "reference": "urn:uuid:e5f6a7b8-c9d0-1234-5678-90abcdef1234" }]
+          },
+          {
+            "title": "Plan of Care",
+            "code": { "coding": [{ "system": "http://loinc.org", "code": "18776-5" }] },
+            "entry": [{ "reference": "urn:uuid:f6a7b8c9-d0e1-2345-6789-0abcdef12345" }]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:ab5b5333-5735-4299-a86d-375b3648115a",
+      "resource": {
+        "resourceType": "Patient", "id": "patient-jane-doe",
+        "name": [{"family": "Doe", "given": ["Jane"]}],
+        "gender": "female", "birthDate": "1985-02-20"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:1e345678-90ab-cdef-1234-567890abcdef",
+      "resource": { "resourceType": "Practitioner", "id": "practitioner-dr-smith", "name": [{"family": "Smith", "given": ["John"], "prefix": ["Dr"]}] }
+    },
+    {
+      "fullUrl": "urn:uuid:2b1f8c8e-5b23-44b8-b5e1-a9d9b6d8f3e5",
+      "resource": {
+        "resourceType": "AllergyIntolerance", "id": "allergy-penicillin",
+        "clinicalStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "code": "active" }] },
+        "verificationStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification", "code": "confirmed" }] },
+        "code": { "coding": [{ "system": "http://snomed.info/sct", "code": "373270004", "display": "Allergy to penicillin" }] },
+        "patient": { "reference": "urn:uuid:ab5b5333-5735-4299-a86d-375b3648115a" }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:3c2g7d7d-6c34-55c9-c6f2-b0e0c7e9g4f6",
+      "resource": {
+        "resourceType": "MedicationStatement", "id": "med-lisinopril",
+        "status": "active",
+        "medicationCodeableConcept": { "coding": [{ "system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "203632", "display": "Lisinopril 10 MG Oral Tablet" }] },
+        "subject": { "reference": "urn:uuid:ab5b5333-5735-4299-a86d-375b3648115a" }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:4d3h6e6e-7d45-66d0-d7g3-c1f1d8f0h5g7",
+      "resource": {
+        "resourceType": "Condition", "id": "problem-hypertension",
+        "clinicalStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active" }] },
+        "verificationStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status", "code": "confirmed" }] },
+        "code": { "coding": [{ "system": "http://snomed.info/sct", "code": "38341003", "display": "Hypertensive disorder" }] },
+        "subject": { "reference": "urn:uuid:ab5b5333-5735-4299-a86d-375b3648115a" }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:5e4i5f5f-8e56-77e1-e8h4-d2g2e9g1i6h8",
+      "resource": {
+        "resourceType": "Immunization", "id": "imm-covid19", "status": "completed",
+        "vaccineCode": { "coding": [{ "system": "http://hl7.org/fhir/sid/cvx", "code": "208", "display": "SARS-COV-2 (COVID-19) vaccine, mRNA, LNP, spike protein, preservative free, 100 mcg/0.5mL dose" }] },
+        "patient": { "reference": "urn:uuid:ab5b5333-5735-4299-a86d-375b3648115a" }, "occurrenceDateTime": "2024-12-15"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:6f5j4g4g-9f67-88f2-f9i5-e3h3f0h2j7i9",
+      "resource": {
+        "resourceType": "Procedure", "id": "proc-appendectomy", "status": "completed",
+        "code": { "coding": [{ "system": "http://snomed.info/sct", "code": "80146002", "display": "Appendectomy" }] },
+        "subject": { "reference": "urn:uuid:ab5b5333-5735-4299-a86d-375b3648115a" }, "performedDateTime": "2015-06-10"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:7g6k3h3h-0g78-99g3-g0j6-f4i4g1i3k8j0",
+      "resource": {
+        "resourceType": "DeviceUseStatement", "id": "dev-pacemaker", "status": "active",
+        "device": { "reference": { "display": "Implanted Pacemaker" } },
+        "subject": { "reference": "urn:uuid:ab5b5333-5735-4299-a86d-375b3648115a" }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:8h7l2i2i-1h89-00h4-h1k7-g5j5h2j4l9k1",
+      "resource": {
+        "resourceType": "Observation", "id": "obs-hba1c", "status": "final",
+        "code": { "coding": [{ "system": "http://loinc.org", "code": "4548-4", "display": "Hemoglobin A1c/Hemoglobin.total in Blood" }] },
+        "subject": { "reference": "urn:uuid:ab5b5333-5735-4299-a86d-375b3648115a" }, "valueQuantity": { "value": 5.7, "unit": "%", "system": "http://unitsofmeasure.org", "code": "%" }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:9i8m1j1j-2i90-11i5-i2l8-h6k6i3k5m0l2",
+      "resource": {
+        "resourceType": "Observation", "id": "obs-bp", "status": "final",
+        "code": { "coding": [{ "system": "http://loinc.org", "code": "85354-9", "display": "Blood pressure panel with all children optional" }] },
+        "subject": { "reference": "urn:uuid:ab5b5333-5735-4299-a86d-375b3648115a" },
+        "component": [
+          {"code": { "coding": [{"system": "http://loinc.org", "code": "8480-6"}]}, "valueQuantity": {"value": 120, "unit": "mm[Hg]"}},
+          {"code": { "coding": [{"system": "http://loinc.org", "code": "8462-4"}]}, "valueQuantity": {"value": 80, "unit": "mm[Hg]"}}
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:a1b2c3d4-e5f6-7890-1234-567890abcdef",
+      "resource": {
+        "resourceType": "Condition", "id": "past-illness-pneumonia", "clinicalStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "resolved" }] },
+        "code": { "coding": [{ "system": "http://snomed.info/sct", "code": "233604007", "display": "Pneumonia" }] },
+        "subject": { "reference": "urn:uuid:ab5b5333-5735-4299-a86d-375b3648115a" }, "onsetDateTime": "2010-03-01", "abatementDateTime": "2010-03-20"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:b2c3d4e5-f6a7-8901-2345-67890abcdef1",
+      "resource": {
+        "resourceType": "Observation", "id": "obs-preg-no", "status": "final",
+        "code": { "coding": [{"system": "http://loinc.org", "code": "82810-3", "display": "Pregnancy status"}] },
+        "subject": { "reference": "urn:uuid:ab5b5333-5735-4299-a86d-375b3648115a" }, "valueCodeableConcept": {"coding": [{"system": "http://snomed.info/sct", "code": "261665006", "display": "Not pregnant"}]}
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:c3d4e5f6-a7b8-9012-3456-7890abcdef12",
+      "resource": {
+        "resourceType": "Observation", "id": "obs-smoke", "status": "final",
+        "code": { "coding": [{"system": "http://loinc.org", "code": "72166-2", "display": "Tobacco smoking status"}] },
+        "subject": { "reference": "urn:uuid:ab5b5333-5735-4299-a86d-375b3648115a" }, "valueCodeableConcept": {"coding": [{"system": "http://snomed.info/sct", "code": "266919005", "display": "Never smoked"}]}
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d4e5f6a7-b8c9-0123-4567-890abcdef123",
+      "resource": {
+        "resourceType": "Consent", "id": "consent-dnr", "status": "active",
+        "scope": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/consentscope", "code": "adr"}]},
+        "category": [{"coding": [{"system": "http://loinc.org", "code": "57016-8"}]}],
+        "patient": { "reference": "urn:uuid:ab5b5333-5735-4299-a86d-375b3648115a" },
+        "policyRule": { "coding": [{"system": "http://terminology.hl7.org/CodeSystem/consentpolicydeident", "code": "dnr"}] }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:e5f6a7b8-c9d0-1234-5678-90abcdef1234",
+      "resource": {
+        "resourceType": "ClinicalImpression", "id": "func-status-independent", "status": "completed",
+        "description": "Patient is fully independent in activities of daily living.",
+        "subject": { "reference": "urn:uuid:ab5b5333-5735-4299-a86d-375b3648115a" }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:f6a7b8c9-d0e1-2345-6789-0abcdef12345",
+      "resource": {
+        "resourceType": "CarePlan", "id": "careplan-hypertension", "status": "active", "intent": "plan",
+        "description": "Continue Lisinopril 10mg daily. Monitor blood pressure weekly. Follow-up in 3 months.",
+        "subject": { "reference": "urn:uuid:ab5b5333-5735-4299-a86d-375b3648115a" }
+      }
+    }
+  ]
+}

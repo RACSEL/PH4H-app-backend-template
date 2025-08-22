@@ -6,6 +6,8 @@ Lacpass backend uses [Keycloak](https://www.keycloak.org/) as its authentication
 cp .env.sample .env
 ```
 
+(More information about [Enviroment Variables](/docs/environment.md))
+
 Then, to start keycloak we can run it from the root directory with docker compose as:
 
 ```bash

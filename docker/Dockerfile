@@ -13,9 +13,10 @@ RUN go mod download
 
 COPY ./cmd/api/ ./
 COPY ./internal ./internal
+COPY ./pkg      ./pkg
 
 RUN swag fmt
-RUN swag init -o internal/docs
+RUN swag init -o pkg/docs
 
 # Go stage to build the API
 FROM golang:1.24 as builder

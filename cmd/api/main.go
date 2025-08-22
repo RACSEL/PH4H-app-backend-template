@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	_ "ips-lacpass-backend/pkg/docs"
 	"os"
 	"os/signal"
 )

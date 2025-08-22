@@ -1,4 +1,4 @@
-package fhir
+package client
 
 type Bundle struct {
 	ResourceType string        `json:"resourceType"`

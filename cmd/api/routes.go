@@ -1,25 +1,29 @@
 package main
 
 import (
-	"ips-lacpass-backend/internal/core"
-	"ips-lacpass-backend/internal/repository/fhir"
-	"ips-lacpass-backend/internal/repository/keycloak"
-	"ips-lacpass-backend/internal/repository/vhl"
+	customMiddleware "ips-lacpass-backend/pkg/middleware"
 	"log/slog"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
-	_ "ips-lacpass-backend/internal/docs"
-
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httplog/v3"
 	httpSwagger "github.com/swaggo/http-swagger"
 
-	"ips-lacpass-backend/internal/handler"
-	customMiddleware "ips-lacpass-backend/internal/middleware"
+	userClient "ips-lacpass-backend/internal/users/client"
+	userCore "ips-lacpass-backend/internal/users/core"
+	userHandler "ips-lacpass-backend/internal/users/handler"
+
+	ipsClient "ips-lacpass-backend/internal/ips/client"
+	ipsCore "ips-lacpass-backend/internal/ips/core"
+	ipsHandler "ips-lacpass-backend/internal/ips/handler"
+
+	vhlClient "ips-lacpass-backend/internal/vhl/client"
+	vhlCore "ips-lacpass-backend/internal/vhl/core"
+	vhlHandler "ips-lacpass-backend/internal/vhl/handler"
 )
 
 func (a *App) loadRoutes() {
@@ -90,7 +94,7 @@ func (a *App) loadRoutes() {
 }
 
 func (a *App) loadUserRoutesNoAuth(router chi.Router) {
-	r := keycloak.NewKeycloakClient(
+	r := userClient.NewClient(
 		a.config.AuthInternalUrl,
 		a.config.AuthRealm,
 		a.config.AuthAdminClientID,
@@ -99,13 +103,13 @@ func (a *App) loadUserRoutesNoAuth(router chi.Router) {
 		a.config.AuthEmailClientID,
 		a.config.AuthEmailLifespan,
 	)
-	s := core.NewUserService(r)
-	h := handler.NewUserHandler(s)
+	s := userCore.NewService(&r)
+	h := userHandler.NewHandler(&s)
 	router.Post("/", h.Create)
 }
 
 func (a *App) loadUserRoutesAuth(router chi.Router) {
-	r := keycloak.NewKeycloakClient(
+	r := userClient.NewClient(
 		a.config.AuthInternalUrl,
 		a.config.AuthRealm,
 		a.config.AuthAdminClientID,
@@ -114,27 +118,23 @@ func (a *App) loadUserRoutesAuth(router chi.Router) {
 		a.config.AuthEmailClientID,
 		a.config.AuthEmailLifespan,
 	)
-	s := core.NewUserService(r)
-	h := handler.NewUserHandler(s)
+	s := userCore.NewService(&r)
+	h := userHandler.NewHandler(&s)
 	router.Put("/update", h.Update)
 }
 
 func (a *App) loadIpsRoute(router chi.Router) {
-	r := fhir.FhirRepository{
-		Client:  &http.Client{},
-		BaseURL: a.config.FhirBaseUrl,
-	}
-	s := core.NewFhirService(r)
-	h := handler.NewIpsHandler(s)
+	r := ipsClient.NewClient(a.config.FhirBaseUrl)
+	s := ipsCore.NewService(&r)
+	h := ipsHandler.NewHandler(&s)
 	router.Get("/", h.Get)
+	router.Post("/merge", h.Merge)
 }
 
 func (a *App) loadVhlRoute(router chi.Router) {
-	r := vhl.VhlRepository{
-		Client:  &http.Client{},
-		BaseURL: a.config.VhlBaseUrl,
-	}
-	s := core.NewVhlService(r)
-	h := handler.NewVhlHandler(s)
+	r := vhlClient.NewClient(a.config.VhlBaseUrl)
+	s := vhlCore.NewService(&r)
+	h := vhlHandler.NewHandler(&s)
 	router.Post("/", h.Create)
+	router.Post("/fetch", h.Get)
 }

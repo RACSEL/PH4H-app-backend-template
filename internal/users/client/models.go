@@ -1,10 +1,12 @@
-package keycloak
+package client
 
 import (
 	"net/http"
+	"sync"
+	"time"
 )
 
-type Client struct {
+type UserClient struct {
 	Client           *http.Client
 	BaseURL          string
 	Realm            string
@@ -13,6 +15,13 @@ type Client struct {
 	EmailRedirectURI string
 	EmailLifespan    int
 	EmailClientID    string
+	TokenManager     *TokenManager
+}
+
+type TokenManager struct {
+	mu             sync.RWMutex
+	token          string
+	tokenExpiresAt time.Time
 }
 
 type UserRegistration struct {
@@ -25,6 +34,10 @@ type UserRegistration struct {
 	Credentials []Credential        `json:"credentials,omitempty"`
 }
 
+type UserID struct {
+	ID string
+}
+
 type Credential struct {
 	Type        string `json:"type"`
 	Value       string `json:"value,omitempty"`
@@ -33,11 +46,9 @@ type Credential struct {
 }
 
 type TokenResponse struct {
-	AccessToken      string `json:"access_token"`
-	RefreshToken     string `json:"refresh_token"`
-	ExpiresIn        int    `json:"expires_in"`
-	RefreshExpiresIn int    `json:"refresh_expires_in"`
-	TokenType        string `json:"token_type"`
+	AccessToken string `json:"access_token"`
+	ExpiresIn   int    `json:"expires_in"`
+	TokenType   string `json:"token_type"`
 }
 
 type UserRegistrationRequest struct {

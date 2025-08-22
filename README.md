@@ -1,7 +1,7 @@
-# PH4H App Backend Template
+# IPS Lacpass Backend
 
-Template for backend for the IPS PH4H App. A unified health app for Connectathon users to view, merge, and share IPS data
-securely cross-border. This project provides a backend system composed of the IPS PH4H API for handling business logic and
+Backend for the IPS Lacpass App. A unified health app for Connectathon users to view, merge, and share IPS data
+securely cross-border. This project provides a backend system composed of the IPS Lacpass API for handling business logic and
 a Keycloak server for authentication and authorization. The entire stack is containerized using Docker and can be easily
 managed with Docker Compose.
 
@@ -12,6 +12,7 @@ managed with Docker Compose.
 - [Prerequisites](#prerequisites)
 - [Getting Started](#getting-started)
   - [Configuration](#configuration)
+  - [Environment Variables](/docs/environment.md)
   - [Running the Application](#running-the-application)
 - [Accessing the Services](#accessing-the-services)
   - [Keycloak Admin Console](#keycloak-admin-console)
@@ -25,7 +26,7 @@ The architecture of this backend system is designed to separate concerns between
 
 ## Components
 
-- **IPS PH4H API**: A lightweight, high-performance API that implements the core features of your application.
+- **IPS Lacpass API**: A lightweight, high-performance API that implements the core features of your application.
   It is protected and requires a valid JWT from an Authorization server to be accessed.
 - **Authorization**: Identity and Access Management solution. It handles user registration, login, and token issuance.
 
@@ -39,7 +40,7 @@ The architecture of this backend system is designed to separate concerns between
 ### Configuration
 
 - [Authentication](/docs/authentication.md)
-- IPS PH4H API (WIP)
+- IPS Lacpass API (WIP)
 
 ### ⚠️ Complete the not implemented calls
 
@@ -53,7 +54,6 @@ To complete these functionalities, search the code for the `TODO: To be implemen
 
 After completing these steps, you can proceed to the next section on running the application.
 
-
 ### Running the Application
 
 Open a terminal in the root directory of the project and run the following command:
@@ -64,7 +64,7 @@ Open a terminal in the root directory of the project and run the following comma
 
 This command will:
 
-- Build the Docker image for the IPS PH4H API.
+- Build the Docker image for the IPS Lacpass API.
 - Pull the official Docker images for Keycloak and Postgres.
 - Create and start the containers for all three services.
 - Attach your terminal to the logs of all running containers.
@@ -83,9 +83,9 @@ Once the services are running, you can access the Keycloak Admin Console to conf
 2.  You will be redirected to the Keycloak landing page. Click on the **Administration Console** link.
 3.  Log in with the admin credentials provided in your [configuration](/docs/authentication.md)
 
-### IPS PH4H API
+### IPS Lacpass API
 
-IPS PH4H API will be accessible at `http://localhost:9081`. You can use a tool like `curl` or Postman to interact 
+IPS Lacpass API will be accessible at `http://localhost:9081`. You can use a tool like `curl` or Postman to interact 
 with your API endpoints. Remember that your API endpoints will be protected by Keycloak, so you will need to obtain a 
 valid JWT from Keycloak to make successful requests. There is a [helper script](./scripts/auth.sh), where you can request 
 a token using:

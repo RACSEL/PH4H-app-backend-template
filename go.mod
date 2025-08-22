@@ -6,7 +6,9 @@ require (
 	github.com/go-chi/chi/v5 v5.2.1
 	github.com/go-chi/httplog/v3 v3.2.2
 	github.com/go-playground/validator/v10 v10.26.0
+	github.com/google/uuid v1.6.0
 	github.com/lestrrat-go/jwx/v2 v2.1.6
+	github.com/mitchellh/mapstructure v1.5.0
 	github.com/swaggo/http-swagger v1.3.4
 	github.com/swaggo/swag v1.16.4
 )

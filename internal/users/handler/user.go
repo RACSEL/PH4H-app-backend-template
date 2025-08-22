@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"ips-lacpass-backend/internal/core"
-	errors2 "ips-lacpass-backend/internal/errors"
+	"ips-lacpass-backend/internal/users/core"
+	errors2 "ips-lacpass-backend/pkg/errors"
 	"net/http"
 	"regexp"
 	"strings"
@@ -13,12 +13,12 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type UserHandler struct {
-	UserService core.UserService
+type Handler struct {
+	Service core.ServiceInterface
 }
 
-func NewUserHandler(s core.UserService) *UserHandler {
-	return &UserHandler{UserService: s}
+func NewHandler(s core.ServiceInterface) *Handler {
+	return &Handler{Service: s}
 }
 
 var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
@@ -81,7 +81,7 @@ type userUpdateRequest struct {
 //	@Failure		404
 //	@Failure		500
 //	@Router			/users [post]
-func (u *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
+func (u *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	var body userCreationRequest
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -138,7 +138,7 @@ func (u *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 		w.Write(res)
 	}
 
-	user, err := u.UserService.CreateUser(r.Context(), core.UserRequest{
+	user, err := u.Service.CreateUser(r.Context(), core.UserRequest{
 		Email:           body.Email,
 		Password:        body.Password,
 		PasswordConfirm: body.PasswordConfirm,
@@ -204,7 +204,7 @@ func (u *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 //	@Failure		404
 //	@Failure		500
 //	@Router			/users/auth/update [put]
-func (u *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
+func (u *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	var body userUpdateRequest
@@ -237,7 +237,7 @@ func (u *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := u.UserService.UpdateUser(r.Context(), core.UserUpdateRequest{
+	user, err := u.Service.UpdateUser(r.Context(), core.UserUpdateRequest{
 		FirstName: body.FirstName,
 		LastName:  body.LastName,
 	})
