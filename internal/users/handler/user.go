@@ -190,16 +190,16 @@ func (u *Handler) Create(w http.ResponseWriter, r *http.Request) {
 // UpdateUser godoc
 //
 //	@Summary		Update user profile
-//	@Description    Update user profile. Only firs name, last name for now
+//	@Description	Update user profile. Only firs name, last name for now
 //	@Tags			Users
 //	@Accept			json
 //	@Produce		json
 //
-//	@Param			user	body		core.UserUpdateRequest	true	"New user details"
+//	@Param			user	body	core.UserUpdateRequest	true	"New user details"
 //
-// @Security		ApiKeyAuth
+//	@Security		ApiKeyAuth
 //
-//	@Success		200		{object}	UserResponse
+//	@Success		200	{object}	UserResponse
 //	@Failure		400
 //	@Failure		404
 //	@Failure		500

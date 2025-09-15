@@ -3,6 +3,7 @@ module ips-lacpass-backend
 go 1.24
 
 require (
+	github.com/fxamacker/cbor/v2 v2.9.0
 	github.com/go-chi/chi/v5 v5.2.1
 	github.com/go-chi/httplog/v3 v3.2.2
 	github.com/go-playground/validator/v10 v10.26.0
@@ -11,6 +12,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/swaggo/http-swagger v1.3.4
 	github.com/swaggo/swag v1.16.4
+	github.com/veraison/go-cose v1.3.0
 )
 
 require (
@@ -34,6 +36,7 @@ require (
 	github.com/mailru/easyjson v0.9.0 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/swaggo/files v1.0.1 // indirect
+	github.com/x448/float16 v0.8.4 // indirect
 	golang.org/x/crypto v0.39.0 // indirect
 	golang.org/x/net v0.41.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect

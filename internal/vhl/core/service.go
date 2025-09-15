@@ -71,7 +71,7 @@ func (vs *VhlService) GetQrIps(ctx context.Context, qrData string, passCode stri
 			Err:        errors.New("content cannot be empty"),
 		}
 	}
-	ipsClt := ipsClient.NewClient("")
+	ipsClt := ipsClient.NewClient("", "")
 	ipsBundle, err := ipsClt.GetIpsBundle(ipsFetchUrl.Files[0].Location)
 	if err != nil {
 		return nil, err

@@ -62,6 +62,14 @@ func (is *IpsService) GetIps(ctx context.Context) (map[string]interface{}, error
 
 }
 
+func (is *IpsService) GetIpsICVP(ctx context.Context, idBundle string, immunizationId *string) (string, error) {
+	result, err := is.Repository.GetIpsICVP(idBundle, immunizationId)
+	if err != nil {
+		return "", err
+	}
+	return result, nil
+}
+
 // Will return the IPS composition sections
 func getIPSComposition(entries []Entry) (*Composition, error) {
 	i := slices.IndexFunc(entries, func(e Entry) bool {

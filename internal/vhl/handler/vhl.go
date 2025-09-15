@@ -3,8 +3,10 @@ package handler
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"ips-lacpass-backend/internal/vhl/core"
 	customErrors "ips-lacpass-backend/pkg/errors"
+	"ips-lacpass-backend/pkg/utils"
 	"net/http"
 )
 
@@ -30,18 +32,19 @@ type VhlGetRequest struct {
 }
 
 type VhlResponse struct {
-	Data string `json:"data"`
+	Data    string                 `json:"data"`
+	Payload map[string]interface{} `json:"payload"`
 }
 
 // Create QR data godoc
 //
-//	@Summary	    Create QR data.
+//	@Summary		Create QR data.
 //	@Description	Create QR data from VHL issuance.
 //	@Tags			IPS FHIR
 //	@Accept			json
 //	@Produce		json
 //
-//	@Security ApiKeyAuth
+//	@Security		ApiKeyAuth
 //
 //	@Param			data	body		VhlRequest	true	"Data parameters"
 //
@@ -83,8 +86,14 @@ func (vh *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	decodedPayload, err := utils.DecodeHCert(qr.Value)
+	if err != nil {
+		fmt.Println("Failed to decode hcert: ", err)
+	}
+
 	res, err := json.Marshal(&VhlResponse{
-		Data: qr.Value,
+		Data:    qr.Value,
+		Payload: decodedPayload,
 	})
 	if err != nil {
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
@@ -100,13 +109,13 @@ func (vh *Handler) Create(w http.ResponseWriter, r *http.Request) {
 
 // Get IPS Bundle from valid QR data godoc
 //
-//	@Summary	    Get IPS Bundle with valid VHL QR.
+//	@Summary		Get IPS Bundle with valid VHL QR.
 //	@Description	Get IPS Bundle using a valid VHL QR.
 //	@Tags			IPS FHIR
 //	@Accept			json
 //	@Produce		json
 //
-//	@Security ApiKeyAuth
+//	@Security		ApiKeyAuth
 //
 //	@Param			data	body		VhlGetRequest	true	"Data parameters"
 //

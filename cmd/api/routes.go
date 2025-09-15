@@ -24,6 +24,10 @@ import (
 	vhlClient "ips-lacpass-backend/internal/vhl/client"
 	vhlCore "ips-lacpass-backend/internal/vhl/core"
 	vhlHandler "ips-lacpass-backend/internal/vhl/handler"
+
+	walletClient "ips-lacpass-backend/internal/wallet/client"
+	walletCore "ips-lacpass-backend/internal/wallet/core"
+	walletHandler "ips-lacpass-backend/internal/wallet/handler"
 )
 
 func (a *App) loadRoutes() {
@@ -80,6 +84,9 @@ func (a *App) loadRoutes() {
 		r.Route("/ips", a.loadIpsRoute)
 		r.Route("/users/auth", a.loadUserRoutesAuth)
 		r.Route("/qr", a.loadVhlRoute)
+		if a.config.WalletEnabled {
+			r.Route("/wallet", a.loadWalletRoutes)
+		}
 	})
 
 	r.Get("/*", func(w http.ResponseWriter, r *http.Request) {
@@ -124,11 +131,12 @@ func (a *App) loadUserRoutesAuth(router chi.Router) {
 }
 
 func (a *App) loadIpsRoute(router chi.Router) {
-	r := ipsClient.NewClient(a.config.FhirBaseUrl)
+	r := ipsClient.NewClient(a.config.FhirBaseUrl, a.config.FhirMediatorBaseUrl)
 	s := ipsCore.NewService(&r)
 	h := ipsHandler.NewHandler(&s)
 	router.Get("/", h.Get)
 	router.Post("/merge", h.Merge)
+	router.Get("/icvp", h.GetICVP)
 }
 
 func (a *App) loadVhlRoute(router chi.Router) {
@@ -137,4 +145,11 @@ func (a *App) loadVhlRoute(router chi.Router) {
 	h := vhlHandler.NewHandler(&s)
 	router.Post("/", h.Create)
 	router.Post("/fetch", h.Get)
+}
+
+func (a *App) loadWalletRoutes(router chi.Router) {
+	r := walletClient.NewClient(a.config.WalletUrl, a.config.WalletIdentifier, a.config.WalletAPIKey)
+	s := walletCore.NewService(&r)
+	h := walletHandler.NewHandler(&s)
+	router.Post("/generate-link", h.GenerateWalletLink)
 }

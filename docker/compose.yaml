@@ -21,7 +21,12 @@ services:
       AUTH_EMAIL_CLIENT_ID: ${AUTH_EMAIL_CLIENT_ID:-app}
       FHIR_BASE_URL: ${FHIR_BASE_URL:-http://lacpass.create.cl:8080}
       VHL_BASE_URL: ${VHL_BASE_URL:-http://lacpass.create.cl:8182}
+      FHIR_MEDIATOR_BASE_URL: ${FHIR_MEDIATOR_BASE_URL:-http://lacpass.create.cl:3000}
       API_SWAGGER: ${API_SWAGGER:-true}
+      WALLET_ENABLED: ${WALLET_ENABLED:-0}
+      WALLET_URL: ${WALLET_URL:-https://conectathon-balancer.izer.tech/}
+      WALLET_IDENTIFIER: ${WALLET_IDENTIFIER:-test}
+      WALLET_API_KEY: ${WALLET_API_KEY:-}
     ports:
       - "9081:3000"
     healthcheck:

@@ -17,8 +17,13 @@ type Config struct {
 	AuthEmailClientID    string
 	FhirBaseUrl          string
 	VhlBaseUrl           string
+	FhirMediatorBaseUrl  string
 	APISwagger           bool
 	LogLevel             string
+	WalletEnabled        bool
+	WalletUrl            string
+	WalletIdentifier     string
+	WalletAPIKey         string
 }
 
 func LoadConfig() Config {
@@ -34,8 +39,13 @@ func LoadConfig() Config {
 		AuthEmailClientID:    "app",
 		FhirBaseUrl:          "http://lacpass.create.cl:8080",
 		VhlBaseUrl:           "http://lacpass.create.cl:8182",
+		FhirMediatorBaseUrl:  "http://lacpass.create.cl:3000/",
 		APISwagger:           false,
 		LogLevel:             "info",
+		WalletEnabled:        false,
+		WalletUrl:            "https://conectathon-balancer.izer.tech/",
+		WalletIdentifier:     "test",
+		WalletAPIKey:         "",
 	}
 
 	if serverPort, exists := os.LookupEnv("API_PORT"); exists {
@@ -75,6 +85,9 @@ func LoadConfig() Config {
 	if fhirBaseUrl, exists := os.LookupEnv("FHIR_BASE_URL"); exists {
 		cfg.FhirBaseUrl = fhirBaseUrl
 	}
+	if fhirMediatorBaseUrl, exists := os.LookupEnv("FHIR_MEDIATOR_BASE_URL"); exists {
+		cfg.FhirMediatorBaseUrl = fhirMediatorBaseUrl
+	}
 	if vhlBaseUrl, exists := os.LookupEnv("VHL_BASE_URL"); exists {
 		cfg.VhlBaseUrl = vhlBaseUrl
 	}
@@ -83,6 +96,20 @@ func LoadConfig() Config {
 	}
 	if logLevel, exists := os.LookupEnv("LOG_LEVEL"); exists {
 		cfg.LogLevel = logLevel
+	}
+
+	if walletEnabled, exists := os.LookupEnv("WALLET_ENABLED"); exists {
+		cfg.WalletEnabled = walletEnabled == "true"
+	}
+	if walletUrl, exists := os.LookupEnv("WALLET_URL"); exists {
+		cfg.WalletUrl = walletUrl
+	}
+	if walletIdentifier, exists := os.LookupEnv("WALLET_IDENTIFIER"); exists {
+		cfg.WalletIdentifier = walletIdentifier
+	}
+
+	if walletAPIKey, exists := os.LookupEnv("WALLET_API_KEY"); exists {
+		cfg.WalletAPIKey = walletAPIKey
 	}
 
 	return cfg

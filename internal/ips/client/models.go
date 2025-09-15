@@ -95,7 +95,8 @@ type DocumentContent struct {
 
 type Attachment struct {
 	ContentType string `json:"contentType"`
-	URL         string `json:"url"`
+	URL         string `json:"url,omitempty"`
+	Data        string `json:"data,omitempty"`
 }
 
 type Signature struct {

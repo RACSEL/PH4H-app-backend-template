@@ -14,9 +14,9 @@ import (
 
 //	@host	localhost:9081
 
-// @securityDefinitions.apikey ApiKeyAuth
-// @in header
-// @name Authorization
+// @securityDefinitions.apikey	ApiKeyAuth
+// @in							header
+// @name						Authorization
 func main() {
 
 	app := New(LoadConfig())

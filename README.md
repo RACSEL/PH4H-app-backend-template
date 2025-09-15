@@ -42,18 +42,6 @@ The architecture of this backend system is designed to separate concerns between
 - [Authentication](/docs/authentication.md)
 - IPS Lacpass API (WIP)
 
-### ⚠️ Complete the not implemented calls
-
-This template backend application includes some functionalities that are intentionally left unimplemented. These are meant to be completed by the participant to assess their knowledge of the FHIR/VHL standards.
-
-To complete these functionalities, search the code for the `TODO: To be implemented by the participant` message. You will find 3 missing functionaties for:
-
-- Implementing an ITI-67 call
-- Implementing an ITI-68 call
-- Implementing a QR code generation using VHL
-
-After completing these steps, you can proceed to the next section on running the application.
-
 ### Running the Application
 
 Open a terminal in the root directory of the project and run the following command:
@@ -69,7 +57,7 @@ This command will:
 - Create and start the containers for all three services.
 - Attach your terminal to the logs of all running containers.
 
-### Setup Keycloak 
+### Setup Keycloak
 
 After all services are running, you need to setup keycloak to have the correct configurations for the backend to authenticate and create users. Before contuining please follow the instructions [here](/docs/keycloak-setup.md).
 
@@ -85,9 +73,9 @@ Once the services are running, you can access the Keycloak Admin Console to conf
 
 ### IPS Lacpass API
 
-IPS Lacpass API will be accessible at `http://localhost:9081`. You can use a tool like `curl` or Postman to interact 
-with your API endpoints. Remember that your API endpoints will be protected by Keycloak, so you will need to obtain a 
-valid JWT from Keycloak to make successful requests. There is a [helper script](./scripts/auth.sh), where you can request 
+IPS Lacpass API will be accessible at `http://localhost:9081`. You can use a tool like `curl` or Postman to interact
+with your API endpoints. Remember that your API endpoints will be protected by Keycloak, so you will need to obtain a
+valid JWT from Keycloak to make successful requests. There is a [helper script](./scripts/auth.sh), where you can request
 a token using:
 
 ```bash
