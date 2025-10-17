@@ -24,6 +24,7 @@ type Config struct {
 	WalletUrl            string
 	WalletIdentifier     string
 	WalletAPIKey         string
+	ICVPValidatorUrl     string
 }
 
 func LoadConfig() Config {
@@ -39,13 +40,14 @@ func LoadConfig() Config {
 		AuthEmailClientID:    "app",
 		FhirBaseUrl:          "http://lacpass.create.cl:8080",
 		VhlBaseUrl:           "http://lacpass.create.cl:8182",
-		FhirMediatorBaseUrl:  "http://lacpass.create.cl:3000/",
+		FhirMediatorBaseUrl:  "http://lacpass.create.cl:3000",
 		APISwagger:           false,
 		LogLevel:             "info",
 		WalletEnabled:        false,
 		WalletUrl:            "https://conectathon-balancer.izer.tech/",
 		WalletIdentifier:     "test",
 		WalletAPIKey:         "",
+		ICVPValidatorUrl:     "http://lacpass.create.cl:7089",
 	}
 
 	if serverPort, exists := os.LookupEnv("API_PORT"); exists {
@@ -110,6 +112,10 @@ func LoadConfig() Config {
 
 	if walletAPIKey, exists := os.LookupEnv("WALLET_API_KEY"); exists {
 		cfg.WalletAPIKey = walletAPIKey
+	}
+
+	if icvpValidatorUrl, exists := os.LookupEnv("ICVP_VALIDATOR_URL"); exists {
+		cfg.ICVPValidatorUrl = icvpValidatorUrl
 	}
 
 	return cfg

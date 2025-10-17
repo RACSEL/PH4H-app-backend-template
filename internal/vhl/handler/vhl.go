@@ -31,6 +31,10 @@ type VhlGetRequest struct {
 	PassCode string `json:"pass_code,omitempty"`
 }
 
+type ICVPValidateRequest struct {
+	Data string `json:"data,require"`
+}
+
 type VhlResponse struct {
 	Data    string                 `json:"data"`
 	Payload map[string]interface{} `json:"payload"`
@@ -157,6 +161,68 @@ func (vh *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	res, err := json.Marshal(ips)
+	if err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write(res)
+	if err != nil {
+		http.Error(w, "Failed to write response", http.StatusInternalServerError)
+		return
+	}
+}
+
+// Validate ICVP data for ICVP that dont come from a IPS
+//
+//	@Summary		Validate ICVP.
+//	@Description	Validate ICVP data. Usefull for ICVPs not linked to a IPS.
+//	@Tags			IPS FHIR
+//	@Accept			json
+//	@Produce		json
+//
+//	@Security		ApiKeyAuth
+//
+//	@Param			data	body		ICVPValidateRequest	true	"Data parameters"
+//
+//	@Success		200		{object}	any
+//	@Failure		400
+//	@Failure		404
+//	@Failure		500
+//	@Router			/qr/validate [post]
+func (vh *Handler) Validate(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// TODO throw correct error body
+	var body ICVPValidateRequest
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	icvpValidationResponseData, err := vh.Service.GetICVPValidation(ctx, body.Data)
+	if err != nil {
+		var httpErr *customErrors.HttpError
+		if errors.As(err, &httpErr) {
+			res, err := json.Marshal(httpErr.Body)
+			if err != nil {
+				http.Error(w, "Failed to encode error response", http.StatusInternalServerError)
+				return
+			}
+			w.WriteHeader(httpErr.StatusCode)
+			_, err = w.Write(res)
+			if err != nil {
+				http.Error(w, "Failed to write response", http.StatusInternalServerError)
+				return
+			}
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+
+		}
+		return
+	}
+
+	res, err := json.Marshal(icvpValidationResponseData)
 	if err != nil {
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 		return

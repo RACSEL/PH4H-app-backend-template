@@ -12,17 +12,20 @@ import (
 type ClientInterface interface {
 	GetDocumentReference(identifier string) (*Bundle, error)
 	GetIpsBundle(url string) (map[string]interface{}, error)
+	GetIpsICVP(idBundle string, immunizationId *string) (string, error)
 }
 
 type IpsClient struct {
-	Client  *http.Client
-	BaseURL string
+	Client          *http.Client
+	BaseURL         string
+	MediatorBaseURL string
 }
 
-func NewClient(baseURL string) IpsClient {
+func NewClient(baseURL string, mediatorBaseURL string) IpsClient {
 	return IpsClient{
-		Client:  &http.Client{},
-		BaseURL: baseURL,
+		Client:          &http.Client{},
+		BaseURL:         baseURL,
+		MediatorBaseURL: mediatorBaseURL,
 	}
 }
 
@@ -55,6 +58,15 @@ func (c *IpsClient) GetDocumentReference(identifier string) (*Bundle, error) {
 }
 
 func (c *IpsClient) GetIpsBundle(url string) (map[string]interface{}, error) {
+	// TODO: To be implemented by the participant
+	return nil, &errors.HttpError{
+		StatusCode: 500,
+		Body:       []map[string]interface{}{{"error": "Not implemented error", "message": "this method is not implemented yet"}},
+		Err:        fmt.Errorf("failed to get document reference"),
+	}
+}
+
+func (c *IpsClient) GetIpsICVP(idBundle string, immunizationId *string) (string, error) {
 	// TODO: To be implemented by the participant
 	return nil, &errors.HttpError{
 		StatusCode: 500,

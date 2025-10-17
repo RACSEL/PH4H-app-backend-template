@@ -7,6 +7,7 @@ import (
 	"ips-lacpass-backend/internal/ips/client"
 	customErrors "ips-lacpass-backend/pkg/errors"
 	authMiddleware "ips-lacpass-backend/pkg/middleware"
+	"log/slog"
 	"slices"
 	"sort"
 	"strings"
@@ -143,6 +144,113 @@ func removeDuplicates(entries []Entry) []Entry {
 	return result
 }
 
+func findCountryInBundle(bundle Bundle) string {
+	for _, entry := range bundle.Entry {
+		if entry.Resource == nil {
+			slog.Warn("No resource found in bundle: ", entry.FullURL)
+			continue
+		}
+
+		rtype, ok := entry.Resource["resourceType"]
+		if !ok || rtype == nil || rtype != "Organization" {
+			slog.Warn("Resource type  is not an Organization: ", entry.FullURL)
+			continue
+		}
+
+		addressEntry, ok := entry.Resource["address"]
+		if !ok || addressEntry == nil {
+			slog.Warn("Resource has has noo Address: ", entry.FullURL)
+			continue
+		}
+
+		addresses, ok := entry.Resource["address"].([]interface{})
+		if !ok || len(addresses) == 0 {
+			slog.Warn("Resource has no address: ", entry.FullURL)
+			continue
+		}
+
+		address, ok := addresses[0].(map[string]interface{})
+		if !ok || address == nil {
+			slog.Warn("Resource address is not a map: ", entry.FullURL)
+			continue
+		}
+
+		country, ok := address["country"]
+		if !ok || country == nil {
+			slog.Warn("Resource address has no country: ", entry.FullURL)
+			continue
+		}
+
+		countryCode, ok := country.(string)
+		if !ok {
+			slog.Warn("Resource country is not a string: ", entry.FullURL)
+			continue
+		}
+		return countryCode
+	}
+	return ""
+}
+
+func findOrganizationEntries(bundle Bundle) []Entry {
+	var entries []Entry
+	for _, entry := range bundle.Entry {
+		if entry.Resource == nil {
+			slog.Warn("No resource found in bundle: ", entry.FullURL)
+			continue
+		}
+
+		rtype, ok := entry.Resource["resourceType"]
+		if !ok || rtype == nil || rtype != "Organization" {
+			continue
+		}
+		entries = append(entries, entry)
+	}
+	return entries
+}
+
+func addOriginExtension(resource map[string]interface{}, bundleID string, country string) {
+	if resource == nil {
+		return
+	}
+
+	originExtension := map[string]interface{}{
+		"url": "http://lacpass.org/fhir/StructureDefinition/resource-origin",
+		"extension": []map[string]interface{}{
+			{
+				"url":         "bundleId",
+				"valueString": bundleID,
+			},
+			{
+				"url":         "country",
+				"valueString": country,
+			},
+		},
+	}
+
+	extensions, ok := resource["extension"].([]interface{})
+	if !ok {
+		extensions = []interface{}{}
+	}
+
+	// Avoid adding duplicate extensions
+	for _, ext := range extensions {
+		extMap, ok := ext.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		url, ok := extMap["url"].(string)
+		if !ok || url != "http://lacpass.org/fhir/StructureDefinition/resource-origin" {
+			continue
+		}
+
+		return
+	}
+
+	extensions = append(extensions, originExtension)
+	resource["extension"] = extensions
+}
+
 func (is *IpsService) MergeIPS(ctx context.Context, currentIpsBundle map[string]interface{}, newIpsBundle map[string]interface{}) (map[string]interface{}, error) {
 	var currIPS, newIPS Bundle
 	if err := mapstructure.Decode(currentIpsBundle, &currIPS); err != nil {
@@ -159,6 +267,17 @@ func (is *IpsService) MergeIPS(ctx context.Context, currentIpsBundle map[string]
 			Body:       []map[string]interface{}{{"error": "bad_request", "message": "Malformed new IPS"}},
 			Err:        fmt.Errorf("malformed new IPS"),
 		}
+	}
+
+	currentCountry := findCountryInBundle(currIPS)
+	newCountry := findCountryInBundle(newIPS)
+
+	for i := range currIPS.Entry {
+		addOriginExtension(currIPS.Entry[i].Resource, currIPS.ID, currentCountry)
+	}
+
+	for i := range newIPS.Entry {
+		addOriginExtension(newIPS.Entry[i].Resource, newIPS.ID, newCountry)
 	}
 
 	curComp, err := getIPSComposition(currIPS.Entry)
@@ -274,6 +393,16 @@ func (is *IpsService) MergeIPS(ctx context.Context, currentIpsBundle map[string]
 
 			}
 		}
+	}
+
+	// Add original Organization resources from both IPSs
+	currIPSOrganizations := findOrganizationEntries(currIPS)
+	newIPSOrganizations := findOrganizationEntries(newIPS)
+	for _, org := range newIPSOrganizations {
+		mergedIPS.Entry = append(mergedIPS.Entry, org)
+	}
+	for _, org := range currIPSOrganizations {
+		mergedIPS.Entry = append(mergedIPS.Entry, org)
 	}
 	mergedIPS.Entry = removeDuplicates(mergedIPS.Entry)
 

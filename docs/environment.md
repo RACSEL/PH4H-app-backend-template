@@ -54,3 +54,6 @@ Fhir server endpoint for FHIR IPS managment. Default: `http://lacpass.create.cl:
 
 `VHL_BASE_URL`
 VHL server endpoint for VHL QR generation, validation and retrieve. Default: `http://lacpass.create.cl:8182`
+
+`ICVP_VALIDATOR_URL`
+Endpoint to validate the QR content of ICVPs not linked to an IPS. Default: `http://lacpass.create.cl:7089`

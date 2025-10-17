@@ -140,11 +140,12 @@ func (a *App) loadIpsRoute(router chi.Router) {
 }
 
 func (a *App) loadVhlRoute(router chi.Router) {
-	r := vhlClient.NewClient(a.config.VhlBaseUrl)
+	r := vhlClient.NewClient(a.config.VhlBaseUrl, a.config.ICVPValidatorUrl)
 	s := vhlCore.NewService(&r)
 	h := vhlHandler.NewHandler(&s)
 	router.Post("/", h.Create)
 	router.Post("/fetch", h.Get)
+	router.Post("/validate", h.Validate)
 }
 
 func (a *App) loadWalletRoutes(router chi.Router) {

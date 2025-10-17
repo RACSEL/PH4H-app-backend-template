@@ -100,3 +100,49 @@ To do this:
 4. On the bottom set your STMP credentials in the **Connection & Authentication** section and save.
 
 ![Configure your SMTP](./images/email_config/configure_smtp.png)
+
+## Enable HTTP access
+
+> [!WARNING]
+> Do not use HTTP in Production, since this will expose users data. We recomended always use a secure HTTPS endpoint.
+
+By default Keycloak supports to be hosted only in a HTTPS endpoint. If you host it in a HTTP endpoint, a error message will be displayed when trying to login 
+into the webclient, and when trying yo authenticate an user.
+
+To disable the required HTTPS, please add to `docker/compose.yaml` this environment variables for `auth`
+service, under the `environments` section:
+
+```yaml
+environment:
+  #...
+  KC_HOSTNAME_STRICT: false
+  KC_HOSTNAME_STRICT_HTTPS: false
+```
+
+This will tell keycloak to not require a HTTPS connection. 
+But if you already build and started your keycloak service, this parameter is already saved
+into keycloak's database. To override it we need to go into the `auth-db` container.
+
+To get inside the `auth-db` container, please run the next command in the project root folder:
+
+```bash
+docker compose exec -it auth-db sh
+```
+
+This will start initialize a shell console inside the container. Then to connect to the
+database run the following command, where `<POSTGRES_USER>` is the enviroment variable in your `.env` file:
+
+```bash
+psql -U <POSTGRES_USER> keycloak
+```
+
+This will connect you into a Postgres console inside the keycloak database. Finally run
+
+```sql
+UPDATE realm SET ssl_required='NONE' WHERE name='master';
+UPDATE realm SET ssl_required='NONE' WHERE name='lacpass';
+```
+
+This will update the keycloak parameters to not required HTTPS.
+
+To exit just run `exit` twice, one to get out of Postgres and a second time to get out of the container.

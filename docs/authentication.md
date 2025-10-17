@@ -14,7 +14,7 @@ Then, to start keycloak we can run it from the root directory with docker compos
 docker compose --file=./docker/compose.yaml up auth
 ```
 
-When the service starts we can visit http://localhost:8082 and check that is running correctly. The admin user will have 
+When the service starts we can visit http://localhost:8082 and check that is running correctly. The admin user will have
 the same credentials specified in the `.env` file. A default realm `lacpass` will be created. The [openid configuration](http://localhost:8082/realms/lacpass/.well-known/openid-configuration)
 should be as follows:
 
@@ -30,7 +30,7 @@ should be as follows:
 }
 ```
 
-To  create a test user we can enter our [local instance](http://localhost:8082) and then in the `Manage realms` tab, 
+To create a test user we can enter our [local instance](http://localhost:8082) and then in the `Manage realms` tab,
 select `lacpass` realm.
 
 ![](./images/keycloak_realms.png "Keycloak realms")
@@ -39,17 +39,22 @@ And then go to the `Users` tab and create a new user:
 
 ![](./images/keycloak_users.png "Keycloak users")
 
-> In the compose we have a mail-catcher container running on port 25 that will show you any email sent by keycloak to 
-the users registered. This emails will not be sent out is just for development.
+> In the compose we have a mail-catcher container running on port 25 that will show you any email sent by keycloak to
+> the users registered. This emails will not be sent out is just for development.
 
 Once the user is created, we can use the helper script to get an access token from Keycloak:
 
 ```bash
-sh scripts/auth.sh
+sh scripts/auth.sh access-token
+```
+
+The access token will show after the command, like this:
+
+```bash
+Successfully logged in!
+Access Token:
+XXXXX.VVVV.BBBB
 ```
 
 For this to work we need to define both `KEYCLOAK_DEFAULT_USER_EMAIL` and `KEYCLOAK_DEFAULT_USER_PASSWORD` in our `.env`
 file.
-
-
-

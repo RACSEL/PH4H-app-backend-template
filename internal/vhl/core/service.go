@@ -78,3 +78,11 @@ func (vs *VhlService) GetQrIps(ctx context.Context, qrData string, passCode stri
 	}
 	return ipsBundle, nil
 }
+
+func (vs *VhlService) GetICVPValidation(ctx context.Context, qrData string) (*client.ICVPQRValidationResponse, error) {
+	validationData, err := vs.Client.ICVPValidate(ctx, qrData)
+	if err != nil {
+		return nil, err
+	}
+	return validationData, nil
+}
