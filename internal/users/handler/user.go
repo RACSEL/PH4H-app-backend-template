@@ -66,21 +66,7 @@ type userUpdateRequest struct {
 	LastName  string `json:"last_name,omitempty" validate:"required"`
 }
 
-// Create User godoc
-//
-//	@Summary		Register a new Keycloak user
-//	@Description	Register a new Keycloak user
-//	@Tags			Users
-//	@Accept			json
-//	@Produce		json
-//
-//	@Param			user	body		core.UserRequest	true	"New user parameters"
-//
-//	@Success		201		{object}	UserResponse
-//	@Failure		400
-//	@Failure		404
-//	@Failure		500
-//	@Router			/users [post]
+// Create Register a new Keycloak user
 func (u *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	var body userCreationRequest
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -187,23 +173,6 @@ func (u *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	w.Write(res)
 }
 
-// UpdateUser godoc
-//
-//	@Summary		Update user profile
-//	@Description	Update user profile. Only firs name, last name for now
-//	@Tags			Users
-//	@Accept			json
-//	@Produce		json
-//
-//	@Param			user	body	core.UserUpdateRequest	true	"New user details"
-//
-//	@Security		ApiKeyAuth
-//
-//	@Success		200	{object}	UserResponse
-//	@Failure		400
-//	@Failure		404
-//	@Failure		500
-//	@Router			/users/auth/update [put]
 func (u *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 

@@ -10,8 +10,6 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/lestrrat-go/jwx/v2 v2.1.6
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/swaggo/http-swagger v1.3.4
-	github.com/swaggo/swag v1.16.4
 	github.com/veraison/go-cose v1.3.0
 )
 

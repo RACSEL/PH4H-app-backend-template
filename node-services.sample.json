@@ -1,0 +1,18 @@
+[
+  {
+    "id": "lacpass",
+    "name": "lacpass",
+    "FHIR_BASE_URL": "http://lacpass.create.cl:8080",
+    "FHIR_MEDIATOR_BASE_URL": "http://lacpass.create.cl:3000",
+    "VHL_BASE_URL": "http://lacpass.create.cl:8182",
+    "ICVP_VALIDATOR_URL": "http://lacpass.create.cl:7100"
+  },
+  {
+    "id": "itb",
+    "name": "ITB",
+    "FHIR_BASE_URL": "http://itb.racsel.cl/fhir",
+    "FHIR_MEDIATOR_BASE_URL": "http://itb.racsel.cl/mediator",
+    "VHL_BASE_URL": "http://itb.racsel.cl/vhl",
+    "ICVP_VALIDATOR_URL": "http://itb.racsel.cl/validator"
+  }
+]

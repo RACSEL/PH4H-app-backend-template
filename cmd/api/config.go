@@ -1,9 +1,20 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"os"
 	"strconv"
 )
+
+type NodeConfig struct {
+	ID                  string `json:"id"`
+	Name                string `json:"name"`
+	FhirBaseUrl         string `json:"FHIR_BASE_URL"`
+	FhirMediatorBaseUrl string `json:"FHIR_MEDIATOR_BASE_URL"`
+	VhlBaseUrl          string `json:"VHL_BASE_URL"`
+	ICVPValidatorUrl    string `json:"ICVP_VALIDATOR_URL"`
+}
 
 type Config struct {
 	ServerPort           uint16
@@ -18,13 +29,14 @@ type Config struct {
 	FhirBaseUrl          string
 	VhlBaseUrl           string
 	FhirMediatorBaseUrl  string
-	APISwagger           bool
 	LogLevel             string
 	WalletEnabled        bool
 	WalletUrl            string
 	WalletIdentifier     string
 	WalletAPIKey         string
 	ICVPValidatorUrl     string
+	UseMultipleNodes     bool
+	Nodes                []NodeConfig
 }
 
 func LoadConfig() Config {
@@ -41,13 +53,13 @@ func LoadConfig() Config {
 		FhirBaseUrl:          "http://lacpass.create.cl:8080",
 		VhlBaseUrl:           "http://lacpass.create.cl:8182",
 		FhirMediatorBaseUrl:  "http://lacpass.create.cl:3000",
-		APISwagger:           false,
 		LogLevel:             "info",
 		WalletEnabled:        false,
 		WalletUrl:            "https://conectathon-balancer.izer.tech/",
 		WalletIdentifier:     "test",
 		WalletAPIKey:         "",
 		ICVPValidatorUrl:     "http://lacpass.create.cl:7089",
+		UseMultipleNodes:     false,
 	}
 
 	if serverPort, exists := os.LookupEnv("API_PORT"); exists {
@@ -93,9 +105,6 @@ func LoadConfig() Config {
 	if vhlBaseUrl, exists := os.LookupEnv("VHL_BASE_URL"); exists {
 		cfg.VhlBaseUrl = vhlBaseUrl
 	}
-	if apiSwagger, exists := os.LookupEnv("API_SWAGGER"); exists {
-		cfg.APISwagger = apiSwagger == "true"
-	}
 	if logLevel, exists := os.LookupEnv("LOG_LEVEL"); exists {
 		cfg.LogLevel = logLevel
 	}
@@ -116,6 +125,30 @@ func LoadConfig() Config {
 
 	if icvpValidatorUrl, exists := os.LookupEnv("ICVP_VALIDATOR_URL"); exists {
 		cfg.ICVPValidatorUrl = icvpValidatorUrl
+	}
+
+	if useMultipleNodes, exists := os.LookupEnv("USE_MULTIPLE_NODES"); exists {
+		cfg.UseMultipleNodes = useMultipleNodes == "1" || useMultipleNodes == "true"
+	}
+
+	if cfg.UseMultipleNodes {
+		nodesFile := "node-services.json"
+		data, err := os.ReadFile(nodesFile)
+		if err != nil {
+			fmt.Printf("Error reading %s: %v\n", nodesFile, err)
+		} else {
+			var nodes []NodeConfig
+			if err := json.Unmarshal(data, &nodes); err != nil {
+				fmt.Printf("Error unmarshaling %s: %v\n", nodesFile, err)
+			} else {
+				for i := range nodes {
+					if nodes[i].ID == "" {
+						nodes[i].ID = nodes[i].Name
+					}
+				}
+				cfg.Nodes = nodes
+			}
+		}
 	}
 
 	return cfg

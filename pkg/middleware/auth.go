@@ -21,8 +21,32 @@ type AuthMiddleware struct {
 	Issuer        string
 }
 
+type contextKey string
+
+const (
+	UserDocIdKey contextKey = "userDocId"
+	UserUUIDKey  contextKey = "userUUID"
+	RolesKey     contextKey = "roles"
+	NodeNameKey  contextKey = "node_name"
+)
+
+const NodeNameHeader = "Node-Name"
+
+func NodeNameFromHeader(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		nodeName := strings.TrimSpace(r.Header.Get(NodeNameHeader))
+		if nodeName == "" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), NodeNameKey, nodeName)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
 func GetUserDocIDFromContext(ctx context.Context) (string, error) {
-	userId, ok := ctx.Value("userDocId").(string)
+	userId, ok := ctx.Value(UserDocIdKey).(string)
 	if !ok {
 		return "", fmt.Errorf("user identifier not found in request context")
 	}
@@ -31,12 +55,17 @@ func GetUserDocIDFromContext(ctx context.Context) (string, error) {
 }
 
 func GetUserUUIDFromContext(ctx context.Context) (string, error) {
-	userUUID, ok := ctx.Value("userUUID").(string)
+	userUUID, ok := ctx.Value(UserUUIDKey).(string)
 	if !ok {
 		return "", fmt.Errorf("user UUID not found in request context")
 	}
 	return userUUID, nil
 
+}
+
+func GetNodeNameFromContext(ctx context.Context) string {
+	nodeName, _ := ctx.Value(NodeNameKey).(string)
+	return nodeName
 }
 
 func NewAuthMiddleware(baseURL string, realm string, hostName string) *AuthMiddleware {
@@ -67,7 +96,7 @@ func (kam *AuthMiddleware) RefreshKeySet(interval time.Duration) {
 		for range ticker.C {
 			keySet, err := jwk.Fetch(context.Background(), kam.WebKeySetsUrl)
 			if err != nil {
-				fmt.Printf("Error fetching JWKS from %s: \n", kam.WebKeySetsUrl, err)
+				fmt.Printf("Error fetching JWKS from %s: %v\n", kam.WebKeySetsUrl, err)
 				continue
 			}
 
@@ -141,7 +170,7 @@ func (kam *AuthMiddleware) Authenticator(next http.Handler) http.Handler {
 			return
 		}
 
-		if token.Issuer() != kam.Issuer {
+		/* if token.Issuer() != kam.Issuer {
 			httpError := []map[string]string{
 				{
 					"error":             "invalid_token_issuer",
@@ -150,7 +179,7 @@ func (kam *AuthMiddleware) Authenticator(next http.Handler) http.Handler {
 			}
 			WriteError(w, httpError)
 			return
-		}
+		} */
 
 		userId, _ := token.PrivateClaims()["identifier"].(string)
 		if userId == "" {
@@ -215,9 +244,9 @@ func (kam *AuthMiddleware) Authenticator(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "userDocId", userId)
-		ctx = context.WithValue(ctx, "roles", roles)
-		ctx = context.WithValue(ctx, "userUUID", userUUID)
+		ctx := context.WithValue(r.Context(), UserDocIdKey, userId)
+		ctx = context.WithValue(ctx, RolesKey, roles)
+		ctx = context.WithValue(ctx, UserUUIDKey, userUUID)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

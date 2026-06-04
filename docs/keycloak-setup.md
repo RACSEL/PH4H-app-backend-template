@@ -7,6 +7,7 @@ This guide explains how to configure the backend service to work with Keycloak. 
 Before using the API service, you must enable authentication and set the client ID so the backend can perform operations on Keycloak, such as registering users.
 
 1. Open the Keycloak service at [http://localhost:9083/](http://localhost:9083/).
+3. Login using `KC_BOOTSTRAP_ADMIN_USERNAME` and `KC_BOOTSTRAP_ADMIN_PASSWORD` credentials from your `.env` file
 2. Once the page loads, ensure you are in the correct realm. The realm name is specified in the `.env` file:
 
    ![Change Realm](./images/client_secret/keycloak_change_realm.png)
@@ -27,12 +28,15 @@ Before using the API service, you must enable authentication and set the client 
 
    - Navigate to the **Credentials** tab.
    - Copy the client secret value (it may be hidden by default).
+   - You can also regenerate it
 
      ![Get Client Secret](./images/client_secret/keycloak_get_client_secret.png)
 
-This client secret is required in the Docker Compose file to configure the backend service. Add it to the appropriate section:
+This client secret is required in the Docker Compose file to configure the backend service. Add it to the appropriate section as a default in your docker-compose or in your `.env` file:
 
 ![Client ID in Docker Compose](./images/client_secret/docker_compose_client_id.png)
+
+Then restart the docker-compose so these changes are reflected on the application backend.
 
 ## Set Roles for Backend Interaction
 

@@ -24,22 +24,7 @@ type GenerateWalletLinkRequest struct {
 	CredentialType client.CredentialType  `json:"credentialType"`
 }
 
-// GenerateWalletLink godoc
-//
-//	@Summary		Generate a wallet link.
-//	@Description	Generate a new wallet link with the given claims. Must enable wallet in config.
-//	@Tags			Wallet
-//	@Accept			json
-//	@Produce		json
-//
-//	@Security		ApiKeyAuth
-//
-//	@Param			data	body		GenerateWalletLinkRequest	true	"Claims for the wallet link"
-//
-//	@Success		200		{object}	client.GenerateWalletLinkResponse
-//	@Failure		400
-//	@Failure		500
-//	@Router			/wallet/generate-link [post]
+// GenerateWalletLink Generate a new wallet link with the given claims. Must enable wallet in config.
 func (h *Handler) GenerateWalletLink(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var reqBody GenerateWalletLinkRequest

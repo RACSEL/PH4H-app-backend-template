@@ -40,9 +40,6 @@ Testing user username. For testing porposes, the app creates a first mock user i
 `KEYCLOAK_DEFAULT_USER_PASSWORD`
 Testing user password. Default: `test`
 
-`API_SWAGGER`
-Enable `/swagger/index.html` endpoint. Boolean value, can be `true` or `false`. Default: `false`
-
 `POSTGRES_USER`
 Postgres database default role name. Default: `postgres`
 

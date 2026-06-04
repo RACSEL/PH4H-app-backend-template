@@ -1,215 +1,1923 @@
 openapi: 3.1.0
 info:
-  title: IPS Lacpass
-  description: IPS Lacpass
-  version: 1.0.0
+  title: Lacpass App API
+  description: This is the official API for Lacpass mobile app.
+  version: "1.0"
+  contact: {}
 servers:
-  - url: 'http://localhost:8081'
+  - url: http://localhost:9081
+    description: Local development server
 paths:
-  /users:
-    post:
-      summary: "Register a new user"
-      description: "Register a new user in the realm. It will send a confirmation email to the user."
+  /ips:
+    get:
+      summary: Fetch IPS from national node.
+      description: Fetch IPS from national node using session access token user identifier.
       tags:
-        - User
+        - IPS FHIR
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/NodeNameHeader'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IpsBundleResponse'
+                example:
+                  resourceType: "Bundle"
+                  id: "16272"
+                  meta:
+                    versionId: "1"
+                    lastUpdated: "2026-05-03T15:57:02.929+00:00"
+                    source: "#vfkIjwwT0b5he4jI"
+                    profile:
+                      - "http://profiles.ihe.net/PHARM/MEOW/StructureDefinition/MedicationOverview"
+                  identifier:
+                    system: "urn:ietf:rfc:3986"
+                    value: "urn:uuid:68c15694-52f1-4171-bc01-e63d666d2a71"
+                  type: "document"
+                  timestamp: "2025-06-17T18:36:18+00:00"
+                  entry:
+                    - fullUrl: "urn:uuid:68c15694-52f1-4171-bc01-e63d666d2a72"
+                      resource:
+                        resourceType: "Composition"
+                        id: "composition-example"
+                        meta:
+                          profile:
+                            - "http://profiles.ihe.net/PHARM/MEOW/StructureDefinition/MedicationOverviewComposition"
+                        status: "final"
+                        type:
+                          coding:
+                            - system: "http://loinc.org"
+                              code: "56445-0"
+                              display: "Medication summary"
+                        subject:
+                          reference: "urn:uuid:68c15694-52f1-4171-bc01-e63d666d2a73"
+                        date: "2025-06-17T18:36:18+00:00"
+                        author:
+                          - reference: "urn:uuid:68c15694-52f1-4171-bc01-e63d666d2a73"
+                        title: "Medication Overview"
+                    - fullUrl: "Patient/16270"
+                      resource:
+                        resourceType: "Patient"
+                        id: "patient-example"
+                        identifier:
+                          - system: "http://hospital.example.org"
+                            value: "12345"
+                        name:
+                          - family: "Doe"
+                            given:
+                              - "John"
+                        gender: "male"
+                        birthDate: "1970-01-01"
+                    - fullUrl: "urn:uuid:68c15694-52f1-4171-bc01-e63d666d2a74"
+                      resource:
+                        resourceType: "MedicationStatement"
+                        id: "medication-statement-1"
+                        status: "active"
+                        medicationCodeableConcept:
+                          coding:
+                            - system: "http://snomed.info/sct"
+                              code: "376834005"
+                              display: "Atorvastatin 20 mg oral tablet"
+                        subject:
+                          reference: "urn:uuid:68c15694-52f1-4171-bc01-e63d666d2a73"
+                        effectivePeriod:
+                          start: "2025-01-01"
+                          end: "2025-12-31"
+                        dateAsserted: "2025-06-17T18:36:18+00:00"
+                        reasonCode:
+                          - text: "Hypercholesterolemia"
+                        dosage:
+                          - text: "20 mg daily"
+                    - fullUrl: "urn:uuid:68c15694-52f1-4171-bc01-e63d666d2a75"
+                      resource:
+                        resourceType: "MedicationStatement"
+                        id: "medication-statement-2"
+                        status: "active"
+                        medicationCodeableConcept:
+                          coding:
+                            - system: "http://snomed.info/sct"
+                              code: "387013003"
+                              display: "Aspirin 81 mg oral tablet"
+                        subject:
+                          reference: "urn:uuid:68c15694-52f1-4171-bc01-e63d666d2a73"
+                        effectivePeriod:
+                          start: "2025-01-01"
+                        dateAsserted: "2025-06-17T18:36:18+00:00"
+                        reasonCode:
+                          - text: "Prophylaxis"
+                        dosage:
+                          - text: "81 mg daily"
+
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
+              examples:
+                BadRequest:
+                  summary: "Bad request"
+                  value:
+                    - error: "bad_request"
+                      error_description: "Bad request"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
+              examples:
+                ExpiredToken:
+                  summary: "Expired token"
+                  value:
+                    - error: "missing_authorization_header"
+                      error_description: "Missing Authorization header in request"
+                KeySetNotAvailable:
+                  summary: "Key set not available"
+                  value:
+                    - error: "key_set_not_available"
+                      error_description: "Key set is not available, please try again later"
+                BadFormattedAuthorizationHeader:
+                  summary: "Bad formatted authorization header"
+                  value:
+                    - error: "bad_formatted_authorization_header"
+                      error_description: "Missing bearer prefix in authorization header"
+                InvalidToken:
+                  summary: "Invalid token"
+                  value:
+                    - error: "invalid_token"
+                      error_description: "Invalid token or signature"
+                TokenUserIdNotFound:
+                  summary: "Token user ID not found"
+                  value:
+                    - error: "token_user_id_not_found"
+                      error_description: "Token does not contain user identifier"
+                TokenRealmAccessNotFound:
+                  summary: "Token realm access not found"
+                  value:
+                    - error: "token_realm_access_not_found"
+                      error_description: "Token does not contain realm access information"
+                TokenRolesNotFound:
+                  summary: "Token roles not found"
+                  value:
+                    - error: "token_roles_not_found"
+                      error_description: "Token does not contain roles information"
+                TokenInvalidRole:
+                  summary: "Token invalid role"
+                  value:
+                    - error: "token_invalid_role"
+                      error_description: "Token contains an invalid role format"
+                TokenUserUUIDNotFound:
+                  summary: "Token user UUID not found"
+                  value:
+                    - error: "token_user_uuid_not_found"
+                      error_description: "Token does not contain user UUID"
+                UserIdentifierNotFound:
+                  summary: "User identifier found"
+                  value:
+                    - error: "user_identifier_not_found"
+                      error_description: "User identifier not found in request context"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
+              examples:
+                IPSNotfound:
+                  summary: "IPS not found"
+                  value:
+                    - error: "not_found"
+                      error_description: "No IPS found for the user"
+  /ips/icvp:
+    get:
+      summary: Generate ICVP certificate from an IPS
+      description: Generate ICVP vaccination certificate using the id of an IPS and optionally the id of an immunization.
+      tags:
+        - IPS FHIR
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/NodeNameHeader'
+        - name: bundleId
+          in: query
+          required: true
+          description: IPS bundle id
+          schema:
+            type: string
+        - name: immunizationId
+          in: query
+          required: false
+          description: Immunization id
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ICVPResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
+              examples:
+                BadRequest:
+                  summary: "Bad request"
+                  value:
+                    - error: "bad_request"
+                      error_description: "Bad request"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
+              examples:
+                ExpiredToken:
+                  summary: "Expired token"
+                  value:
+                    - error: "missing_authorization_header"
+                      error_description: "Missing Authorization header in request"
+                KeySetNotAvailable:
+                  summary: "Key set not available"
+                  value:
+                    - error: "key_set_not_available"
+                      error_description: "Key set is not available, please try again later"
+                BadFormattedAuthorizationHeader:
+                  summary: "Bad formatted authorization header"
+                  value:
+                    - error: "bad_formatted_authorization_header"
+                      error_description: "Missing bearer prefix in authorization header"
+                InvalidToken:
+                  summary: "Invalid token"
+                  value:
+                    - error: "invalid_token"
+                      error_description: "Invalid token or signature"
+                TokenUserIdNotFound:
+                  summary: "Token user ID not found"
+                  value:
+                    - error: "token_user_id_not_found"
+                      error_description: "Token does not contain user identifier"
+                TokenRealmAccessNotFound:
+                  summary: "Token realm access not found"
+                  value:
+                    - error: "token_realm_access_not_found"
+                      error_description: "Token does not contain realm access information"
+                TokenRolesNotFound:
+                  summary: "Token roles not found"
+                  value:
+                    - error: "token_roles_not_found"
+                      error_description: "Token does not contain roles information"
+                TokenInvalidRole:
+                  summary: "Token invalid role"
+                  value:
+                    - error: "token_invalid_role"
+                      error_description: "Token contains an invalid role format"
+                TokenUserUUIDNotFound:
+                  summary: "Token user UUID not found"
+                  value:
+                    - error: "token_user_uuid_not_found"
+                      error_description: "Token does not contain user UUID"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
+              examples:
+                ExpiredToken:
+                  summary: "Not found"
+                  value:
+                    - error: "not_found"
+                      error_description: "Not found"
+  /ips/merge:
+    post:
+      summary: Merge two IPS bundles into a unified IPS.
+      description: Merge two FHIR R4 IPS bundles into a single one, removing redundancy.
+      tags:
+        - IPS FHIR
+      security:
+        - ApiKeyAuth: []
       requestBody:
-        description: "User registration details"
+        description: IPS bundles to merge
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  format: email
-                  description: The email address for the new account.
-                  example: john.doe@example.com
-                password:
-                  type: string
-                  format: password
-                  description: The password for the new account.
-                  example: MySuperSecurePassword123!
-                password-confirm:
-                  type: string
-                  format: password
-                  description: Confirmation of the password. Must match 'password'.
-                  example: MySuperSecurePassword123!
-                firstName:
-                  type: string
-                  description: (Optional) The first name of the user.
-                  example: John
-                lastName:
-                  type: string
-                  description: (Optional) The last name of the user.
-                  example: Doe
-                locale:
-                  type: string
-                  description: "Preferred language."
-                  enum:
-                    - en
-                    - es
-                    - pt-br
-                  example: en
-                document_type:
-                  type: string
-                  description: "Identity document type"
-                  enum:
-                    - passport
-                    - id
-                  example: passport
-                identifier:
-                  type: string
-                  description: "Document identifier"
-                  example: F12345678
-              required:
-                - username
-                - email
-                - password
-                - password-confirm
-                - locale
-                - document_type
-                - identifier
+              $ref: '#/components/schemas/MergeIPSRequest'
       responses:
         "200":
-          description: "Successful registration. The user will get a confirmation e-mail."
+          description: OK
           content:
             application/json:
               schema:
                 type: object
-                properties:
-                  sub:
-                    type: string
-                    description: "User's id on the realm."
-                  name:
-                    type: string
-                    description: "Full name."
-                  given_name:
-                    type: string
-                    description: "Given name or first name."
-                  family_name:
-                    type: string
-                    description: "Surname or last name."
-                  preferred_username:
-                    type: string
-                    description: "Preferred username."
-                  email:
-                    type: string
-                    format: email
-                    description: "E-mail address."
-                  email_verified:
-                    type: boolean
-                    description: "Indicates if the user's email has been verified."
-                  locale:
-                    type: string
-                    description: "Preferred language."
-                  document_type:
-                    type: string
-                    description: "Identity document type"
-                    enum:
-                      - passport
-                      - id
-                  identifier:
-                    type: string
-                    description: "Document identifier"
-              example:
-                sub: "a8c6d49a-72c7-4402-a1b1-7a5e9f8b4d6c"
-                name: "John Doe"
-                given_name: "John"
-                family_name: "Doe"
-                preferred_username: "jdoe"
-                email: "johndoe@example.com"
-                email_verified: false
-                locale: "en"
-                document_type: "passport"
-                identifier: "F12345678"
         "400":
-          description: "The request is malformed or missing required fields."
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
+              examples:
+                MalformedCurrentIPS:
+                  summary: "Bad request"
+                  value:
+                    - error: "bad_request"
+                      error_description: "Malformed current IPS"
+                MalformedNewIPS:
+                  summary: "Bad request"
+                  value:
+                    - error: "bad_request"
+                      error_description: "Malformed new IPS"
+                NoComposition:
+                  summary: "No composition"
+                  value:
+                    - error: "bad_request"
+                      error_description: "Current IPS does not have its composition"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
+              examples:
+                ExpiredToken:
+                  summary: "Expired token"
+                  value:
+                    - error: "missing_authorization_header"
+                      error_description: "Missing Authorization header in request"
+                KeySetNotAvailable:
+                  summary: "Key set not available"
+                  value:
+                    - error: "key_set_not_available"
+                      error_description: "Key set is not available, please try again later"
+                BadFormattedAuthorizationHeader:
+                  summary: "Bad formatted authorization header"
+                  value:
+                    - error: "bad_formatted_authorization_header"
+                      error_description: "Missing bearer prefix in authorization header"
+                InvalidToken:
+                  summary: "Invalid token"
+                  value:
+                    - error: "invalid_token"
+                      error_description: "Invalid token or signature"
+                TokenUserIdNotFound:
+                  summary: "Token user ID not found"
+                  value:
+                    - error: "token_user_id_not_found"
+                      error_description: "Token does not contain user identifier"
+                TokenRealmAccessNotFound:
+                  summary: "Token realm access not found"
+                  value:
+                    - error: "token_realm_access_not_found"
+                      error_description: "Token does not contain realm access information"
+                TokenRolesNotFound:
+                  summary: "Token roles not found"
+                  value:
+                    - error: "token_roles_not_found"
+                      error_description: "Token does not contain roles information"
+                TokenInvalidRole:
+                  summary: "Token invalid role"
+                  value:
+                    - error: "token_invalid_role"
+                      error_description: "Token contains an invalid role format"
+                TokenUserUUIDNotFound:
+                  summary: "Token user UUID not found"
+                  value:
+                    - error: "token_user_uuid_not_found"
+                      error_description: "Token does not contain user UUID"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
+              examples:
+                ExpiredToken:
+                  summary: "Not found"
+                  value:
+                    - error: "not_found"
+                      error_description: "Not found"
+  /qr:
+    post:
+      summary: Create QR data.
+      description: Create QR data from VHL issuance.
+      tags:
+        - IPS FHIR
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/NodeNameHeader'
+      requestBody:
+        description: Data parameters
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VhlRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VhlResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
+              examples:
+                BadRequest:
+                  summary: "Content cannot be empty"
+                  value:
+                    - error: "invalid_request"
+                      error_description: "Content cannot be empty"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
+              examples:
+                ExpiredToken:
+                  summary: "Expired token"
+                  value:
+                    - error: "missing_authorization_header"
+                      error_description: "Missing Authorization header in request"
+                KeySetNotAvailable:
+                  summary: "Key set not available"
+                  value:
+                    - error: "key_set_not_available"
+                      error_description: "Key set is not available, please try again later"
+                BadFormattedAuthorizationHeader:
+                  summary: "Bad formatted authorization header"
+                  value:
+                    - error: "bad_formatted_authorization_header"
+                      error_description: "Missing bearer prefix in authorization header"
+                InvalidToken:
+                  summary: "Invalid token"
+                  value:
+                    - error: "invalid_token"
+                      error_description: "Invalid token or signature"
+                TokenUserIdNotFound:
+                  summary: "Token user ID not found"
+                  value:
+                    - error: "token_user_id_not_found"
+                      error_description: "Token does not contain user identifier"
+                TokenRealmAccessNotFound:
+                  summary: "Token realm access not found"
+                  value:
+                    - error: "token_realm_access_not_found"
+                      error_description: "Token does not contain realm access information"
+                TokenRolesNotFound:
+                  summary: "Token roles not found"
+                  value:
+                    - error: "token_roles_not_found"
+                      error_description: "Token does not contain roles information"
+                TokenInvalidRole:
+                  summary: "Token invalid role"
+                  value:
+                    - error: "token_invalid_role"
+                      error_description: "Token contains an invalid role format"
+                TokenUserUUIDNotFound:
+                  summary: "Token user UUID not found"
+                  value:
+                    - error: "token_user_uuid_not_found"
+                      error_description: "Token does not contain user UUID"
+        "404":
+          description: Not Found
+  /qr/fetch:
+    post:
+      summary: Get IPS Bundle with valid VHL QR.
+      description: Get IPS Bundle using a valid VHL QR.
+      tags:
+        - IPS FHIR
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/NodeNameHeader'
+      requestBody:
+        description: Data parameters
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VhlGetRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
+              examples:
+                ExpiredToken:
+                  summary: "Expired token"
+                  value:
+                    - error: "missing_authorization_header"
+                      error_description: "Missing Authorization header in request"
+                KeySetNotAvailable:
+                  summary: "Key set not available"
+                  value:
+                    - error: "key_set_not_available"
+                      error_description: "Key set is not available, please try again later"
+                BadFormattedAuthorizationHeader:
+                  summary: "Bad formatted authorization header"
+                  value:
+                    - error: "bad_formatted_authorization_header"
+                      error_description: "Missing bearer prefix in authorization header"
+                InvalidToken:
+                  summary: "Invalid token"
+                  value:
+                    - error: "invalid_token"
+                      error_description: "Invalid token or signature"
+                TokenUserIdNotFound:
+                  summary: "Token user ID not found"
+                  value:
+                    - error: "token_user_id_not_found"
+                      error_description: "Token does not contain user identifier"
+                TokenRealmAccessNotFound:
+                  summary: "Token realm access not found"
+                  value:
+                    - error: "token_realm_access_not_found"
+                      error_description: "Token does not contain realm access information"
+                TokenRolesNotFound:
+                  summary: "Token roles not found"
+                  value:
+                    - error: "token_roles_not_found"
+                      error_description: "Token does not contain roles information"
+                TokenInvalidRole:
+                  summary: "Token invalid role"
+                  value:
+                    - error: "token_invalid_role"
+                      error_description: "Token contains an invalid role format"
+                TokenUserUUIDNotFound:
+                  summary: "Token user UUID not found"
+                  value:
+                    - error: "token_user_uuid_not_found"
+                      error_description: "Token does not contain user UUID"
+        "502":
+          description: Bad Gateway
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
+              examples:
+                ValidationError:
+                  summary: "Validation error"
+                  value:
+                    - error: "validation_error"
+                      error_description: "Validation server did not return a valid access URL"
+                UnsuccessfulValidation:
+                  summary: "Unsuccessful validation"
+                  value:
+                    - error: "unsuccessful_validation"
+                      error_description: "Validation step unsuccessful. Code: {0} Description: {1}"
+                InvalidManifest:
+                  summary: "Invalid manifest"
+                  value:
+                    - error: "invalid_manifest_url"
+                      error_description: "Manifest server returned invalid bundle url."
+  /qr/validate:
+    post:
+      summary: Validate ICVP.
+      description: Validate ICVP data. Useful for ICVPs not linked to an IPS.
+      tags:
+        - IPS FHIR
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/NodeNameHeader'
+      requestBody:
+        description: Data parameters
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ICVPValidateRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
+              examples:
+                BadRequest:
+                  summary: "Bad request"
+                  value:
+                    - error: "bad_request"
+                      error_description: "Bad request"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
+              examples:
+                ExpiredToken:
+                  summary: "Expired token"
+                  value:
+                    - error: "missing_authorization_header"
+                      error_description: "Missing Authorization header in request"
+                KeySetNotAvailable:
+                  summary: "Key set not available"
+                  value:
+                    - error: "key_set_not_available"
+                      error_description: "Key set is not available, please try again later"
+                BadFormattedAuthorizationHeader:
+                  summary: "Bad formatted authorization header"
+                  value:
+                    - error: "bad_formatted_authorization_header"
+                      error_description: "Missing bearer prefix in authorization header"
+                InvalidToken:
+                  summary: "Invalid token"
+                  value:
+                    - error: "invalid_token"
+                      error_description: "Invalid token or signature"
+                TokenUserIdNotFound:
+                  summary: "Token user ID not found"
+                  value:
+                    - error: "token_user_id_not_found"
+                      error_description: "Token does not contain user identifier"
+                TokenRealmAccessNotFound:
+                  summary: "Token realm access not found"
+                  value:
+                    - error: "token_realm_access_not_found"
+                      error_description: "Token does not contain realm access information"
+                TokenRolesNotFound:
+                  summary: "Token roles not found"
+                  value:
+                    - error: "token_roles_not_found"
+                      error_description: "Token does not contain roles information"
+                TokenInvalidRole:
+                  summary: "Token invalid role"
+                  value:
+                    - error: "token_invalid_role"
+                      error_description: "Token contains an invalid role format"
+                TokenUserUUIDNotFound:
+                  summary: "Token user UUID not found"
+                  value:
+                    - error: "token_user_uuid_not_found"
+                      error_description: "Token does not contain user UUID"
+  /medications:
+    get:
+      summary: Fetch Medications from national node.
+      description: Fetch Medications from national node using session access token user identifier.
+      tags:
+        - IPS FHIR
+      security:
+        - ApiKeyAuth: [ ]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IpsBundleResponse'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
+              examples:
+                ExpiredToken:
+                  summary: "Expired token"
+                  value:
+                    - error: "missing_authorization_header"
+                      error_description: "Missing Authorization header in request"
+                KeySetNotAvailable:
+                  summary: "Key set not available"
+                  value:
+                    - error: "key_set_not_available"
+                      error_description: "Key set is not available, please try again later"
+                BadFormattedAuthorizationHeader:
+                  summary: "Bad formatted authorization header"
+                  value:
+                    - error: "bad_formatted_authorization_header"
+                      error_description: "Missing bearer prefix in authorization header"
+                InvalidToken:
+                  summary: "Invalid token"
+                  value:
+                    - error: "invalid_token"
+                      error_description: "Invalid token or signature"
+                TokenUserIdNotFound:
+                  summary: "Token user ID not found"
+                  value:
+                    - error: "token_user_id_not_found"
+                      error_description: "Token does not contain user identifier"
+                TokenRealmAccessNotFound:
+                  summary: "Token realm access not found"
+                  value:
+                    - error: "token_realm_access_not_found"
+                      error_description: "Token does not contain realm access information"
+                TokenRolesNotFound:
+                  summary: "Token roles not found"
+                  value:
+                    - error: "token_roles_not_found"
+                      error_description: "Token does not contain roles information"
+                TokenInvalidRole:
+                  summary: "Token invalid role"
+                  value:
+                    - error: "token_invalid_role"
+                      error_description: "Token contains an invalid role format"
+                TokenUserUUIDNotFound:
+                  summary: "Token user UUID not found"
+                  value:
+                    - error: "token_user_uuid_not_found"
+                      error_description: "Token does not contain user UUID"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
+              examples:
+                NotFound:
+                  summary: "Not found"
+                  value:
+                    - error: "not_found"
+                      error_description: "No Medication found for the user"
+  /medications/meow:
+    get:
+      summary: Generate MEOW
+      description: Generate MEOW
+      tags:
+        - IPS FHIR
+      security:
+        - ApiKeyAuth: [ ]
+      parameters:
+        - name: bundleId
+          in: query
+          required: true
+          description: Medication bundle id
+          schema:
+            type: string
+        - name: medicationStatementId
+          in: query
+          required: true
+          description: Medication statement id
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ICVPResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
+              examples:
+                BadRequest:
+                  summary: "Bad request"
+                  value:
+                    - error: "bad_request"
+                      error_description: "Bad request"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
+              examples:
+                ExpiredToken:
+                  summary: "Expired token"
+                  value:
+                    - error: "missing_authorization_header"
+                      error_description: "Missing Authorization header in request"
+                KeySetNotAvailable:
+                  summary: "Key set not available"
+                  value:
+                    - error: "key_set_not_available"
+                      error_description: "Key set is not available, please try again later"
+                BadFormattedAuthorizationHeader:
+                  summary: "Bad formatted authorization header"
+                  value:
+                    - error: "bad_formatted_authorization_header"
+                      error_description: "Missing bearer prefix in authorization header"
+                InvalidToken:
+                  summary: "Invalid token"
+                  value:
+                    - error: "invalid_token"
+                      error_description: "Invalid token or signature"
+                TokenUserIdNotFound:
+                  summary: "Token user ID not found"
+                  value:
+                    - error: "token_user_id_not_found"
+                      error_description: "Token does not contain user identifier"
+                TokenRealmAccessNotFound:
+                  summary: "Token realm access not found"
+                  value:
+                    - error: "token_realm_access_not_found"
+                      error_description: "Token does not contain realm access information"
+                TokenRolesNotFound:
+                  summary: "Token roles not found"
+                  value:
+                    - error: "token_roles_not_found"
+                      error_description: "Token does not contain roles information"
+                TokenInvalidRole:
+                  summary: "Token invalid role"
+                  value:
+                    - error: "token_invalid_role"
+                      error_description: "Token contains an invalid role format"
+                TokenUserUUIDNotFound:
+                  summary: "Token user UUID not found"
+                  value:
+                    - error: "token_user_uuid_not_found"
+                      error_description: "Token does not contain user UUID"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
+              examples:
+                ExpiredToken:
+                  summary: "Not found"
+                  value:
+                    - error: "not_found"
+                      error_description: "Not found"
+  /nodes:
+    get:
+      summary: "List all available nodes"
+      description: "Returns a list of node ids and display names. Use the id value with the Node-Name request header if multiple nodes are enabled."
+      tags:
+        - Discovery
+      responses:
+        "200":
+          description: "A list of node ids and display names."
           content:
             application/json:
               schema:
                 type: array
                 items:
                   type: object
-                  properties:
-                    error:
-                      type: string
-                    error_description:
-                      type: string
                   required:
-                    - error
-                    - error_description
+                    - id
+                    - name
+                  properties:
+                    id:
+                      type: string
+                      description: "ASCII-safe node identifier used in the Node-Name request header."
+                      example: node-1
+                    name:
+                      type: string
+                      description: "Human-readable node name for display."
+                      example: "Node 1"
+              example:
+                - id: node-1
+                  name: "Node 1"
+                - id: node-2
+                  name: "Node 2"
+        "404":
+          description: "Multiple nodes are not enabled."
+  /users:
+    post:
+      summary: Register a new Keycloak user
+      description: Register a new Keycloak user
+      tags:
+        - Users
+      requestBody:
+        description: New user parameters
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
               examples:
-                MissingUsername:
+                BadRequest:
+                  summary: "Bad request"
                   value:
-                  - error: "missing_username"
-                    error_description: "Missing required field: username"
-                MissingEmail:
+                    - error: "missing_{0}"
+                      error_description: "Missing required field: {0}"
+                    - error: "invalid_{0}"
+                      error_description: "Invalid {0} type"
+                    - error: "invalid_{0}"
+                      error_description: "Invalid {0}. Must be either {1}"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
+              examples:
+                ExpiredToken:
+                  summary: "Expired token"
                   value:
-                  - error: "missing_email"
-                    error_description: "Missing required field: email"
-                MissingPassword:
+                    - error: "missing_authorization_header"
+                      error_description: "Missing Authorization header in request"
+                KeySetNotAvailable:
+                  summary: "Key set not available"
                   value:
-                  - error: "missing_password"
-                    error_description: "Missing required field: password"
-                MissingPasswordConfirmation:
+                    - error: "key_set_not_available"
+                      error_description: "Key set is not available, please try again later"
+                BadFormattedAuthorizationHeader:
+                  summary: "Bad formatted authorization header"
                   value:
-                  - error: "missing_password_confirmation"
-                    error_description: "Missing required field: password-confirm"
-                MissingLocale:
+                    - error: "bad_formatted_authorization_header"
+                      error_description: "Missing bearer prefix in authorization header"
+                InvalidToken:
+                  summary: "Invalid token"
                   value:
-                  - error: "missing_locale"
-                    error_description: "Missing required field: locale"
-                MissingDocumentType:
+                    - error: "invalid_token"
+                      error_description: "Invalid token or signature"
+                TokenUserIdNotFound:
+                  summary: "Token user ID not found"
                   value:
-                  - error: "missing_document_type"
-                    error_description: "Missing required field: document_type"
-                MissingIdentifier:
+                    - error: "token_user_id_not_found"
+                      error_description: "Token does not contain user identifier"
+                TokenRealmAccessNotFound:
+                  summary: "Token realm access not found"
                   value:
-                  - error: "missing_identifier"
-                    error_description: "Missing required field: identifier"
-                InvalidDocumentType:
+                    - error: "token_realm_access_not_found"
+                      error_description: "Token does not contain realm access information"
+                TokenRolesNotFound:
+                  summary: "Token roles not found"
                   value:
-                  - error: "invalid_document_type"
-                    error_description: "Invalid document type. Must be either 'passport' or 'id'."
-                InvalidIdentifierFormat:
+                    - error: "token_roles_not_found"
+                      error_description: "Token does not contain roles information"
+                TokenInvalidRole:
+                  summary: "Token invalid role"
                   value:
-                  - error: "invalid_identifier_format"
-                    error_description: "Invalid identifier format."
-                InvalidEmailFormat:
+                    - error: "token_invalid_role"
+                      error_description: "Token contains an invalid role format"
+                TokenUserUUIDNotFound:
+                  summary: "Token user UUID not found"
                   value:
-                  - error: "invalid_email_format"
-                    error_description: "Invalid email format"
-                PasswordMismatch:
-                  value:
-                  - error: "password_mismatch"
-                    error_description: "Password and password confirmation do not match"
-                InvalidPasswordMinLength:
-                  value:
-                  - error: "invalid_password_min_length_message"
-                    error_description: "Invalid password: minimum length <number>"
-                InvalidPasswordMaxLength:
-                  value:
-                  - error: "invalid_password_max_length_message"
-                    error_description: "Invalid password: maximum length <number>"
+                    - error: "token_user_uuid_not_found"
+                      error_description: "Token does not contain user UUID"
         "409":
-          description: "The request is malformed or missing required fields."
+          description: Conflict
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    error:
-                      type: string
-                    error_description:
-                      type: string
-                  required:
-                    - error
-                    - error_description
+                $ref: '#/components/schemas/ErrorResponseList'
               examples:
-                DuplicateUser:
+                ExpiredToken:
+                  summary: "User already exists"
                   value:
                     - error: "user_already_exists"
                       error_description: "User already exists"
+  /users/auth/update:
+    put:
+      summary: Update user profile
+      description: Update user profile. Only first name, last name for now.
+      tags:
+        - Users
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        description: New user details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
+              examples:
+                BadRequest:
+                  summary: "Missing required field"
+                  value:
+                    - error: "missing_{0}"
+                      error_description: "Missing required field: {0}"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
+              examples:
+                ExpiredToken:
+                  summary: "Expired token"
+                  value:
+                    - error: "missing_authorization_header"
+                      error_description: "Missing Authorization header in request"
+                KeySetNotAvailable:
+                  summary: "Key set not available"
+                  value:
+                    - error: "key_set_not_available"
+                      error_description: "Key set is not available, please try again later"
+                BadFormattedAuthorizationHeader:
+                  summary: "Bad formatted authorization header"
+                  value:
+                    - error: "bad_formatted_authorization_header"
+                      error_description: "Missing bearer prefix in authorization header"
+                InvalidToken:
+                  summary: "Invalid token"
+                  value:
+                    - error: "invalid_token"
+                      error_description: "Invalid token or signature"
+                TokenUserIdNotFound:
+                  summary: "Token user ID not found"
+                  value:
+                    - error: "token_user_id_not_found"
+                      error_description: "Token does not contain user identifier"
+                TokenRealmAccessNotFound:
+                  summary: "Token realm access not found"
+                  value:
+                    - error: "token_realm_access_not_found"
+                      error_description: "Token does not contain realm access information"
+                TokenRolesNotFound:
+                  summary: "Token roles not found"
+                  value:
+                    - error: "token_roles_not_found"
+                      error_description: "Token does not contain roles information"
+                TokenInvalidRole:
+                  summary: "Token invalid role"
+                  value:
+                    - error: "token_invalid_role"
+                      error_description: "Token contains an invalid role format"
+                TokenUserUUIDNotFound:
+                  summary: "Token user UUID not found"
+                  value:
+                    - error: "token_user_uuid_not_found"
+                      error_description: "Token does not contain user UUID"
+  /wallet/generate-link:
+    post:
+      summary: Generate a wallet link.
+      description: Generate a new wallet link with the given claims. Must enable wallet in config.
+      tags:
+        - Wallet
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        description: Claims for the wallet link
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateWalletLinkRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateWalletLinkResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
+              examples:
+                BadRequest:
+                  summary: "Bad request"
+                  value:
+                    - error: "bad_request"
+                      error_description: "Bad request"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseList'
+              examples:
+                ExpiredToken:
+                  summary: "Expired token"
+                  value:
+                    - error: "missing_authorization_header"
+                      error_description: "Missing Authorization header in request"
+                KeySetNotAvailable:
+                  summary: "Key set not available"
+                  value:
+                    - error: "key_set_not_available"
+                      error_description: "Key set is not available, please try again later"
+                BadFormattedAuthorizationHeader:
+                  summary: "Bad formatted authorization header"
+                  value:
+                    - error: "bad_formatted_authorization_header"
+                      error_description: "Missing bearer prefix in authorization header"
+                InvalidToken:
+                  summary: "Invalid token"
+                  value:
+                    - error: "invalid_token"
+                      error_description: "Invalid token or signature"
+                TokenUserIdNotFound:
+                  summary: "Token user ID not found"
+                  value:
+                    - error: "token_user_id_not_found"
+                      error_description: "Token does not contain user identifier"
+                TokenRealmAccessNotFound:
+                  summary: "Token realm access not found"
+                  value:
+                    - error: "token_realm_access_not_found"
+                      error_description: "Token does not contain realm access information"
+                TokenRolesNotFound:
+                  summary: "Token roles not found"
+                  value:
+                    - error: "token_roles_not_found"
+                      error_description: "Token does not contain roles information"
+                TokenInvalidRole:
+                  summary: "Token invalid role"
+                  value:
+                    - error: "token_invalid_role"
+                      error_description: "Token contains an invalid role format"
+                TokenUserUUIDNotFound:
+                  summary: "Token user UUID not found"
+                  value:
+                    - error: "token_user_uuid_not_found"
+                      error_description: "Token does not contain user UUID"
+components:
+  parameters:
+    NodeNameHeader:
+      name: Node-Name
+      in: header
+      required: false
+      description: Optional ASCII-safe node id to route the request to a configured national node when USE_MULTIPLE_NODES is enabled. Omit this header, or provide an unknown node id, to use the default service configuration.
+      schema:
+        type: string
+      example: node-1
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      name: Authorization
+      in: header
+  schemas:
+    IpsBundleResponse:
+      type: object
+      description: A FHIR document Bundle containing the International Patient Summary (IPS).
+      required:
+        - resourceType
+        - id
+        - identifier
+        - type
+        - timestamp
+        - entry
+      properties:
+        resourceType:
+          type: string
+          enum: [ Bundle ]
+        id:
+          type: string
+        meta:
+          $ref: '#/components/schemas/Meta'
+        identifier:
+          $ref: '#/components/schemas/Identifier'
+        type:
+          type: string
+          enum: [ document ]
+        timestamp:
+          type: string
+          format: date-time
+        entry:
+          type: array
+          description: A collection of resources including the clinical Composition, Patient, and associated medical records.
+          items:
+            $ref: '#/components/schemas/BundleEntry'
+        signature:
+          $ref: '#/components/schemas/Signature'
+      example:
+        resourceType: "Bundle"
+        id: "16211"
+        meta:
+          versionId: "2"
+          lastUpdated: "2026-04-29T14:28:07.284+00:00"
+          source: "#YVYxj0c2Xi2BRSW2"
+        identifier:
+          system: "urn:ietf:rfc:4122"
+          value: "6c2a1d8f-a93d-4571-ad5e-ce5ebdbdb044"
+        type: "document"
+        timestamp: "2023-01-15T17:26:43.023+00:00"
+        entry:
+          - fullUrl: "urn:uuid:545fd8ea-35b9-4174-916c-2b6badf8593f"
+            resource:
+              resourceType: "Composition"
+              text:
+                status: "generated"
+                div: "<div xmlns=\"http://www.w3.org/1999/xhtml\">asd</div>"
+              status: "final"
+              type:
+                coding:
+                  - system: "http://loinc.org"
+                    code: "60591-5"
+                    display: "Patient Summary Document"
+              subject:
+                reference: "urn:uuid:cb03baf7-77d3-46c5-88c8-da80f2eb0518"
+              date: "2023-01-15T17:26:43+00:00"
+              author:
+                - reference: "urn:uuid:96fb51d5-3a1f-44c9-a43a-e6b6e5d5f4f1"
+              title: "Patient Summary as of 01/15/2023"
+              confidentiality: "N"
+              custodian:
+                reference: "urn:uuid:96fb51d5-3a1f-44c9-a43a-e6b6e5d5f4f1"
+              section:
+                - title: "Active Problems"
+                  code:
+                    coding:
+                      - system: "http://loinc.org"
+                        code: "11450-4"
+                        display: "Problem list Reported"
+                  text:
+                    status: "generated"
+                    div: "<div xmlns=\"http://www.w3.org/1999/xhtml\">Hot flushes</div>"
+                  entry:
+                    - reference: "urn:uuid:147097b0-aee3-46fe-8ac8-25f20b6363a5"
+                    - reference: "urn:uuid:147197b0-aee3-46fe-8ac8-25f20b6363a5"
+                    - reference: "urn:uuid:147297b0-aee3-46fe-8ac8-25f20b6363a5"
+                    - reference: "urn:uuid:147397b0-aee3-46fe-8ac8-25f20b6363a5"
+                - title: "Medication"
+                  code:
+                    coding:
+                      - system: "http://loinc.org"
+                        code: "10160-0"
+                        display: "History of Medication use Narrative"
+                  text:
+                    status: "generated"
+                    div: "<div xmlns=\"http://www.w3.org/1999/xhtml\">To be populated at future time</div>"
+                  entry:
+                    - reference: "urn:uuid:8428e5f8-b6b0-4337-9c22-462a008a9923"
+                    - reference: "urn:uuid:8428e5f8-b6b1-4337-9c22-462a008a9923"
+                    - reference: "urn:uuid:8428e5f8-b6b2-4337-9c22-462a008a9923"
+                - title: "Allergies and Intolerances"
+                  code:
+                    coding:
+                      - system: "http://loinc.org"
+                        code: "48765-2"
+                        display: "Allergies and adverse reactions Document"
+                  text:
+                    status: "generated"
+                    div: "<div xmlns=\"http://www.w3.org/1999/xhtml\">To be populated at future time</div>"
+                  entry:
+                    - reference: "urn:uuid:f2a0d599-02ab-4166-a579-eb45416ac18c"
+                - title: "History of Immunizations"
+                  code:
+                    coding:
+                      - system: "http://loinc.org"
+                        code: "11369-6"
+                        display: "History of Immunization Narrative"
+                  text:
+                    status: "generated"
+                    div: "<div xmlns=\"http://www.w3.org/1999/xhtml\">To be populated at future time</div>"
+                  entry:
+                    - reference: "urn:uuid:6fef12e7-64ad-4792-b2ad-5d6b699588fc"
+                - title: "History of Procedures"
+                  code:
+                    coding:
+                      - system: "http://loinc.org"
+                        code: "47519-4"
+                        display: "History of Procedures"
+                  text:
+                    status: "generated"
+                    div: "<div xmlns=\"http://www.w3.org/1999/xhtml\">To be populated at future time</div>"
+                  entry:
+                    - reference: "urn:uuid:0d0d8bed-ac5d-4383-90fb-8d803edba427"
+                    - reference: "urn:uuid:0d1d8bed-ac5d-4383-90fb-8d803edba427"
+          - fullUrl: "urn:uuid:cb03baf7-77d3-46c5-88c8-da80f2eb0518"
+            resource:
+              resourceType: "Patient"
+              text:
+                status: "generated"
+                div: "<div xmlns=\"http://www.w3.org/1999/xhtml\">asd</div>"
+              identifier:
+                - type:
+                    coding:
+                      - system: "http://terminology.hl7.org/CodeSystem/v2-0203"
+                        code: "TAX"
+                  system: "urn:oid.2.16.152"
+                - use: "official"
+                  type:
+                    coding:
+                      - system: "http://terminology.hl7.org/CodeSystem/v2-0203"
+                        code: "PPN"
+                  system: "urn:oid.2.16.152"
+                  value: "SR765432"
+              active: true
+              name:
+                - use: "official"
+                  text: "Ronnie Brunswijk"
+                  family: "Brunswijk"
+                  given:
+                    - "Ronnie"
+              gender: "male"
+              birthDate: "1961-03-07"
+              contact:
+                - name:
+                    text: "Practitioner/Anthony Nesty"
+          - fullUrl: "urn:uuid:96fb51d5-3a1f-44c9-a43a-e6b6e5d5f4f1"
+            resource:
+              resourceType: "Organization"
+              text:
+                status: "generated"
+                div: "<div xmlns=\"http://www.w3.org/1999/xhtml\">asd</div>"
+              name: "Academic Hospital Paramaribo"
+              address:
+                - text: "Flustraat 1"
+                  country: "SR"
+          - fullUrl: "urn:uuid:147097b0-aee3-46fe-8ac8-25f20b6363a5"
+            resource:
+              resourceType: "Condition"
+              text:
+                status: "generated"
+                div: "<div xmlns=\"http://www.w3.org/1999/xhtml\">asd</div>"
+              clinicalStatus:
+                coding:
+                  - system: "http://terminology.hl7.org/CodeSystem/condition-clinical"
+                    code: "inactive"
+              category:
+                - coding:
+                    - system: "http://terminology.hl7.org/CodeSystem/condition-category"
+                      code: "encounter-diagnosis"
+                      display: "Encounter Diagnosis"
+              code:
+                coding:
+                  - system: "http://snomed.info/sct"
+                    code: "415510005"
+                    display: "Sedentarismo"
+              subject:
+                reference: "urn:uuid:cb03baf7-77d3-46c5-88c8-da80f2eb0518"
+          - fullUrl: "urn:uuid:147197b0-aee3-46fe-8ac8-25f20b6363a5"
+            resource:
+              resourceType: "Condition"
+              text:
+                status: "generated"
+                div: "<div xmlns=\"http://www.w3.org/1999/xhtml\">asd</div>"
+              clinicalStatus:
+                coding:
+                  - system: "http://terminology.hl7.org/CodeSystem/condition-clinical"
+                    code: "inactive"
+              category:
+                - coding:
+                    - system: "http://terminology.hl7.org/CodeSystem/condition-category"
+                      code: "encounter-diagnosis"
+                      display: "Encounter Diagnosis"
+              code:
+                coding:
+                  - system: "http://snomed.info/sct"
+                    code: "59621000"
+                    display: "Hipertensión arterial esencial "
+              subject:
+                reference: "urn:uuid:cb03baf7-77d3-46c5-88c8-da80f2eb0518"
+          - fullUrl: "urn:uuid:147297b0-aee3-46fe-8ac8-25f20b6363a5"
+            resource:
+              resourceType: "Condition"
+              text:
+                status: "generated"
+                div: "<div xmlns=\"http://www.w3.org/1999/xhtml\">asd</div>"
+              clinicalStatus:
+                coding:
+                  - system: "http://terminology.hl7.org/CodeSystem/condition-clinical"
+                    code: "active"
+              category:
+                - coding:
+                    - system: "http://terminology.hl7.org/CodeSystem/condition-category"
+                      code: "encounter-diagnosis"
+                      display: "Encounter Diagnosis"
+              code:
+                coding:
+                  - system: "http://hl7.org/fhir/sid/icd-10"
+                    code: "C50.9"
+                    display: "Cáncer de mama"
+              subject:
+                reference: "urn:uuid:cb03baf7-77d3-46c5-88c8-da80f2eb0518"
+          - fullUrl: "urn:uuid:147397b0-aee3-46fe-8ac8-25f20b6363a5"
+            resource:
+              resourceType: "Condition"
+              text:
+                status: "generated"
+                div: "<div xmlns=\"http://www.w3.org/1999/xhtml\">asd</div>"
+              clinicalStatus:
+                coding:
+                  - system: "http://terminology.hl7.org/CodeSystem/condition-clinical"
+                    code: "active"
+              category:
+                - coding:
+                    - system: "http://terminology.hl7.org/CodeSystem/condition-category"
+                      code: "encounter-diagnosis"
+                      display: "Encounter Diagnosis"
+              code:
+                coding:
+                  - system: "http://hl7.org/fhir/sid/icd-10"
+                    code: "F32.9"
+                    display: "Trastorno depresivo "
+              subject:
+                reference: "urn:uuid:cb03baf7-77d3-46c5-88c8-da80f2eb0518"
+          - fullUrl: "urn:uuid:8428e5f8-b6b0-4337-9c22-462a008a9923"
+            resource:
+              resourceType: "MedicationStatement"
+              text:
+                status: "generated"
+                div: "<div xmlns=\"http://www.w3.org/1999/xhtml\">asd</div>"
+              status: "active"
+              medicationReference:
+                reference: "urn:uuid:93abe23a-0aa0-4395-bce1-9c0f64778380"
+                display: "Omperazol"
+              subject:
+                reference: "urn:uuid:cb03baf7-77d3-46c5-88c8-da80f2eb0518"
+              effectivePeriod:
+                start: "2025-09"
+          - fullUrl: "urn:uuid:8428e5f8-b6b1-4337-9c22-462a008a9923"
+            resource:
+              resourceType: "MedicationStatement"
+              text:
+                status: "generated"
+                div: "<div xmlns=\"http://www.w3.org/1999/xhtml\">asd</div>"
+              status: "active"
+              medicationReference:
+                reference: "urn:uuid:59ec324d-1b5a-433b-8991-6818918ebb17"
+                display: "Ranitidina"
+              subject:
+                reference: "urn:uuid:cb03baf7-77d3-46c5-88c8-da80f2eb0518"
+              effectivePeriod:
+                start: "2025-09"
+          - fullUrl: "urn:uuid:8428e5f8-b6b2-4337-9c22-462a008a9923"
+            resource:
+              resourceType: "MedicationStatement"
+              text:
+                status: "generated"
+                div: "<div xmlns=\"http://www.w3.org/1999/xhtml\">asd</div>"
+              status: "active"
+              medicationReference:
+                reference: "urn:uuid:71181586-58d3-4406-b28c-dc62877650f8"
+                display: "Loratadina"
+              subject:
+                reference: "urn:uuid:cb03baf7-77d3-46c5-88c8-da80f2eb0518"
+              effectivePeriod:
+                start: "2025-09"
+          - fullUrl: "urn:uuid:93abe23a-0aa0-4395-bce1-9c0f64778380"
+            resource:
+              resourceType: "Medication"
+              text:
+                status: "generated"
+                div: "<div xmlns=\"http://www.w3.org/1999/xhtml\">asd</div>"
+              code:
+                coding:
+                  - system: "http://snomed.info/sct"
+                    code: "25673006"
+                    display: "Omperazol"
+          - fullUrl: "urn:uuid:59ec324d-1b5a-433b-8991-6818918ebb17"
+            resource:
+              resourceType: "Medication"
+              text:
+                status: "generated"
+                div: "<div xmlns=\"http://www.w3.org/1999/xhtml\">asd</div>"
+              code:
+                coding:
+                  - system: "http://snomed.info/sct"
+                    code: "48174005"
+                    display: "Ranitidina"
+          - fullUrl: "urn:uuid:71181586-58d3-4406-b28c-dc62877650f8"
+            resource:
+              resourceType: "Medication"
+              text:
+                status: "generated"
+                div: "<div xmlns=\"http://www.w3.org/1999/xhtml\">asd</div>"
+              code:
+                coding:
+                  - system: "http://snomed.info/sct"
+                    code: "108652002"
+                    display: "Loratadina"
+          - fullUrl: "urn:uuid:f2a0d599-02ab-4166-a579-eb45416ac18c"
+            resource:
+              resourceType: "AllergyIntolerance"
+              text:
+                status: "generated"
+                div: "<div xmlns=\"http://www.w3.org/1999/xhtml\">asd</div>"
+              clinicalStatus:
+                coding:
+                  - system: "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical"
+                    code: "active"
+              code:
+                coding:
+                  - system: "http://snomed.info/sct"
+                    code: "294532003"
+                    display: "Alergia a cefalosporinas"
+              patient:
+                reference: "urn:uuid:cb03baf7-77d3-46c5-88c8-da80f2eb0518"
+          - fullUrl: "urn:uuid:6fef12e7-64ad-4792-b2ad-5d6b699588fc"
+            resource:
+              resourceType: "Immunization"
+              meta:
+                profile:
+                  - "http://lacpass.racsel.org/StructureDefinition/lac-immunization"
+              text:
+                status: "generated"
+                div: "<div xmlns=\"http://www.w3.org/1999/xhtml\">asd</div>"
+              extension:
+                - url: "http://smart.who.int/pcmt/StructureDefinition/ProductID"
+                  valueCoding:
+                    system: "http://smart.who.int/pcmt-vaxprequal/CodeSystem/PreQualProductIDs"
+                    code: "PolioVaccineInactivatedSProduct2050ea67709cfcde28a01f0546276e96"
+              status: "completed"
+              vaccineCode:
+                coding:
+                  - system: "https://worldhealthorganization.github.io/smart-icvp/ValueSet-ICVPProductIds.html"
+                    code: "XM1Y59"
+                text: "Vacuna antipoliomelítica oral (VOP)"
+              patient:
+                reference: "urn:uuid:cb03baf7-77d3-46c5-88c8-da80f2eb0518"
+              occurrenceDateTime: "2025-09-26T18:45:00"
+              lotNumber: "123123123"
+              performer:
+                - actor:
+                    reference: "urn:uuid:046a98e9-141a-4f8b-a7d0-0ead56f5a37a"
+          - fullUrl: "urn:uuid:0d0d8bed-ac5d-4383-90fb-8d803edba427"
+            resource:
+              resourceType: "Procedure"
+              id: "a066ca58-bea9-50cb-aaa0-4300b7575b51"
+              meta:
+                profile:
+                  - "http://ig.ehealth4u.eu/fhir/StructureDefinition/cyehr-sd-procedure-r4"
+              text:
+                status: "generated"
+                div: "<div xmlns=\"http://www.w3.org/1999/xhtml\">asd</div>"
+              status: "in-progress"
+              code:
+                coding:
+                  - system: "http://snomed.info/sct"
+                    code: "168731009"
+                    display: "Radiografía de Torax"
+              subject:
+                reference: "urn:uuid:cb03baf7-77d3-46c5-88c8-da80f2eb0518"
+              performedDateTime: "2025-09-02"
+          - fullUrl: "urn:uuid:0d1d8bed-ac5d-4383-90fb-8d803edba427"
+            resource:
+              resourceType: "Procedure"
+              id: "a066ca58-bea9-50cb-aaa0-4300b7575b51"
+              meta:
+                profile:
+                  - "http://ig.ehealth4u.eu/fhir/StructureDefinition/cyehr-sd-procedure-r4"
+              text:
+                status: "generated"
+                div: "<div xmlns=\"http://www.w3.org/1999/xhtml\">asd</div>"
+              status: "not-done"
+              code:
+                coding:
+                  - system: "http://snomed.info/sct"
+                    code: "41976001"
+                    display: "Cateterismo cardíaco"
+              subject:
+                reference: "urn:uuid:cb03baf7-77d3-46c5-88c8-da80f2eb0518"
+              performedDateTime: "2025-09-29"
+          - fullUrl: "urn:uuid:046a98e9-141a-4f8b-a7d0-0ead56f5a37a"
+            resource:
+              resourceType: "Practitioner"
+              meta:
+                profile:
+                  - "http://hl7.org/fhir/uv/ips/StructureDefinition/Practitioner-uv-ips"
+              text:
+                status: "generated"
+                div: "<div xmlns=\"http://www.w3.org/1999/xhtml\">asd</div>"
+              name:
+                - text: "Anthony Nesty"
+        signature:
+          type:
+            - system: "urn:iso-astm:E1762-95:2013"
+              code: "1.2.840.10065.1.12.1.5"
+          when: "2026-04-29T14:28:06.754Z"
+          who:
+            identifier:
+              value: "LACPass"
+          data: "cwvnHGvfLQcO/9gwhcsvV8c2kwxrfreNT+j9oSEDxs9CmYOpaYWcYiOODJyIsGKaZkpSRVSAXPHV8BgWu2Bn8FrG6SkY3gQTHbRpLv85dhSmHQBuiStxc5fgtPeFeTrWjj7rOrWvszCEP5vA4KiakVCx2lg4AioHvi/ErRpMuXlkHmKF0a6fsNMl94wO/WfbAkWtNw58qIWSJduxUOs4GALbAhhy4Nm7QUTngF8ivh+ePCZXr2eDJxQ22KEapCVH0EgLv638LGSr8yFCzdZOE06w74G0bGSrRrI5AK3kAxq5Bg8ATxMwQjgqYkBgZWqGUG63V5PF8OOek/e1uMs+yz56q8tX//yuqyd07l+RVQ1DEFS/Kq6pOf04ZTpVGz8jauwjcmprZkiDuLA0xCzkK//c1qYPttL+257yQzbCZ7eR4x8WYYlVcJ6GVoqxDsKZvdGnTPvbTspHjYimqvyK7Ywyr7nz82TsyZegmBi+LCNCOOr72PiJ8cNw1qqA/QNpRxBlEH8LIBWfWZiyQCIcZWhsUyE/bo56WBdzh3d9lHSdywkWj4n/gK2LQURmdvXHw8jY/DU821JVBrIGZPSr2H88Yx9gRN6qZsIWX3DgYZPZR1d3Vr9F58NeoNI/kxAxg+keoxdPZGeBtdINsSxAkRh8TuexAtyb2Xp3TGCej9o="
+
+    Meta:
+      type: object
+      properties:
+        versionId:
+          type: string
+        lastUpdated:
+          type: string
+          format: date-time
+        source:
+          type: string
+        profile:
+          type: array
+          items:
+            type: string
+
+    Identifier:
+      type: object
+      properties:
+        use:
+          type: string
+          enum: [ usual, official, temp, secondary, old ]
+        type:
+          $ref: '#/components/schemas/CodeableConcept'
+        system:
+          type: string
+        value:
+          type: string
+
+    BundleEntry:
+      type: object
+      required:
+        - fullUrl
+        - resource
+      properties:
+        fullUrl:
+          type: string
+          format: uri
+        resource:
+          $ref: '#/components/schemas/FhirResource'
+
+    FhirResource:
+      type: object
+      required:
+        - resourceType
+      properties:
+        resourceType:
+          type: string
+          enum:
+            - Composition
+            - Patient
+            - Organization
+            - Condition
+            - MedicationStatement
+            - Medication
+            - AllergyIntolerance
+            - Immunization
+            - Procedure
+            - Practitioner
+      additionalProperties: true
+
+    CodeableConcept:
+      type: object
+      properties:
+        coding:
+          type: array
+          items:
+            $ref: '#/components/schemas/Coding'
+        text:
+          type: string
+
+    Coding:
+      type: object
+      properties:
+        system:
+          type: string
+        code:
+          type: string
+        display:
+          type: string
+
+    Signature:
+      type: object
+      required:
+        - type
+        - when
+        - who
+        - data
+      properties:
+        type:
+          type: array
+          items:
+            $ref: '#/components/schemas/Coding'
+        when:
+          type: string
+          format: date-time
+        who:
+          type: object
+          properties:
+            reference:
+              type: string
+            identifier:
+              $ref: '#/components/schemas/Identifier'
+        data:
+          type: string
+          description: Base64 encoded signature content
+
+    CredentialType:
+      type: string
+      enum:
+        - VerifiableHealthLink
+        - ICVP
+      example: "VerifiableHealthLink"
+    GenerateWalletLinkResponse:
+      type: object
+      properties:
+        coUrl:
+          type: string
+          example: "https://wallet.example.com/claim/123"
+        location:
+          type: string
+          example: "https://api.example.com/v1/wallet/123"
+        preAuthorizedCode:
+          type: string
+          example: "a7b8c9d0e1f2"
+        qrUrl:
+          type: string
+          example: "https://api.example.com/v1/qr/123.png"
+    GenerateWalletLinkRequest:
+      type: object
+      properties:
+        claims:
+          type: object
+          additionalProperties: true
+          example:
+            patient_id: "P-12345"
+            issue_date: "2026-05-03"
+        credentialType:
+          $ref: '#/components/schemas/CredentialType'
+    ICVPResponse:
+      type: object
+      properties:
+        data:
+          type: string
+          example: "base64-encoded-certificate-data"
+        payload:
+          type: object
+          additionalProperties: true
+          example:
+            issuer: "Ministry of Health"
+            valid_until: "2027-05-03"
+    ICVPValidateRequest:
+      type: object
+      properties:
+        data:
+          type: string
+          example: "base64-encoded-qr-content"
+    MergeIPSRequest:
+      type: object
+      properties:
+        current_ips:
+          type: object
+          $ref: '#/components/schemas/IpsBundleResponse'
+        new_ips:
+          type: object
+          $ref: '#/components/schemas/IpsBundleResponse'
+    UserResponse:
+      type: object
+      properties:
+        document_type:
+          type: string
+          example: "passport"
+        email:
+          type: string
+          example: "user@example.com"
+        first_name:
+          type: string
+          example: "Juan"
+        id:
+          type: string
+          example: "uuid-9876-5432"
+        identifier:
+          type: string
+          example: "AB1234567"
+        last_name:
+          type: string
+          example: "Perez"
+        locale:
+          type: string
+          example: "en-US"
+        username:
+          type: string
+          example: "jdoe88"
+    VhlGetRequest:
+      type: object
+      properties:
+        data:
+          type: string
+          example: "shc:/567..."
+        pass_code:
+          type: string
+          example: "123456"
+    VhlRequest:
+      type: object
+      properties:
+        content:
+          type: string
+          example: "FHIR-JSON-Content"
+        expires_on:
+          type: string
+          example: "2026-12-31T23:59:59Z"
+        pass_code:
+          type: string
+          example: "secure-pass-99"
+    VhlResponse:
+      type: object
+      properties:
+        data:
+          type: string
+          example: "https://vhl.link/abc"
+        payload:
+          type: object
+          additionalProperties: true
+          example:
+            status: "active"
+    DocumentType:
+      type: string
+      enum:
+        - passport
+        - identifier
+      example: "passport"
+    UserRequest:
+      type: object
+      required:
+        - document_type
+        - email
+        - first_name
+        - identifier
+        - last_name
+        - locale
+        - password
+        - password_confirm
+      properties:
+        document_type:
+          $ref: '#/components/schemas/DocumentType'
+        email:
+          type: string
+          example: "newuser@example.com"
+        first_name:
+          type: string
+          example: "Juan"
+        identifier:
+          type: string
+          example: "CD7654321"
+        last_name:
+          type: string
+          example: "Perez"
+        locale:
+          type: string
+          example: "es-CL"
+        password:
+          type: string
+          example: "P@ssword123!"
+        password_confirm:
+          type: string
+          example: "P@ssword123!"
+    UserUpdateRequest:
+      type: object
+      required:
+        - first_name
+        - last_name
+      properties:
+        first_name:
+          type: string
+          example: "Juan"
+        last_name:
+          type: string
+          example: "Perez"
+    ErrorResponseList:
+      type: array
+      items:
+        type: object
+        required:
+          - error
+          - error_description
+        properties:
+          error:
+            type: string
+          error_description:
+            type: string
+
+
+

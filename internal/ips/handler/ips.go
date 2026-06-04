@@ -6,6 +6,7 @@ import (
 	"ips-lacpass-backend/internal/ips/core"
 	errors2 "ips-lacpass-backend/pkg/errors"
 	"ips-lacpass-backend/pkg/utils"
+	"log/slog"
 	"net/http"
 )
 
@@ -29,24 +30,12 @@ func NewHandler(s *core.IpsService) *Handler {
 	}
 }
 
-// GetIPS godoc
-//
-//	@Summary		Fetch IPS from national node.
-//	@Description	Fetch IPS from national node using session access token user identifier.
-//	@Tags			IPS FHIR
-//	@Produce		json
-//
-//	@Security		ApiKeyAuth
-//
-//	@Success		200	{object}	any
-//	@Failure		400
-//	@Failure		404
-//	@Failure		500
-//	@Router			/ips [get]
+// Get Fetch IPS from national node
 func (ih *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	ips, err := ih.IpsService.GetIps(ctx)
 	if err != nil {
+		slog.Error("Failed to get IPS", "error", err)
 		var httpErr *errors2.HttpError
 		if errors.As(err, &httpErr) {
 			res, err := json.Marshal(httpErr.Body)
@@ -80,22 +69,7 @@ func (ih *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// MergeIPS godoc
-//
-//	@Summary		Merge two IPS bundles into a unified IPS.
-//	@Description	Merge two FHIR R4 IPS bundles into a single one, removing reduncancy.
-//	@Tags			IPS FHIR
-//	@Produce		json
-//
-//	@Security		ApiKeyAuth
-//
-//	@Param			data	body		MergeIPSRequest	true	"IPS bundles to merge"
-//
-//	@Success		200		{object}	any
-//	@Failure		400
-//	@Failure		404
-//	@Failure		500
-//	@Router			/ips/merge [post]
+// Merge erge two FHIR R4 IPS bundles into a single one, removing reduncancy
 func (ih *Handler) Merge(w http.ResponseWriter, r *http.Request) {
 	var body MergeIPSRequest
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -123,23 +97,7 @@ func (ih *Handler) Merge(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetICVP godoc
-//
-//	@Summary		Generate ICVP certificate from an IPS
-//	@Description	Generate ICVP vaccination certificate using the id of an IPS and optionally the id of an immunization.
-//	@Tags			IPS FHIR
-//	@Produce		json
-//
-//	@Security		ApiKeyAuth
-//
-//	@Param			bundleId		query		string	true	"IPS bundle id"
-//	@Param			immunizationId	query		string	false	"Immunization id"
-//
-//	@Success		200				{object}	ICVPDataResponse
-//	@Failure		400
-//	@Failure		404
-//	@Failure		500
-//	@Router			/ips/icvp [get]
+// GetICVP Generate ICVP vaccination certificate using the id of an IPS and optionally the id of an immunization.
 func (ih *Handler) GetICVP(w http.ResponseWriter, r *http.Request) {
 	bundleId := r.URL.Query().Get("bundleId")
 	if bundleId == "" {

@@ -7,6 +7,7 @@ import (
 	"ips-lacpass-backend/internal/vhl/core"
 	customErrors "ips-lacpass-backend/pkg/errors"
 	"ips-lacpass-backend/pkg/utils"
+	"log"
 	"net/http"
 )
 
@@ -40,23 +41,7 @@ type VhlResponse struct {
 	Payload map[string]interface{} `json:"payload"`
 }
 
-// Create QR data godoc
-//
-//	@Summary		Create QR data.
-//	@Description	Create QR data from VHL issuance.
-//	@Tags			IPS FHIR
-//	@Accept			json
-//	@Produce		json
-//
-//	@Security		ApiKeyAuth
-//
-//	@Param			data	body		VhlRequest	true	"Data parameters"
-//
-//	@Success		200		{object}	VhlResponse
-//	@Failure		400
-//	@Failure		404
-//	@Failure		500
-//	@Router			/qr [post]
+// Create Create QR data from VHL issuance.
 func (vh *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	// TODO check if user is authenticated and has the permission to create a QR code
@@ -111,29 +96,14 @@ func (vh *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Get IPS Bundle from valid QR data godoc
-//
-//	@Summary		Get IPS Bundle with valid VHL QR.
-//	@Description	Get IPS Bundle using a valid VHL QR.
-//	@Tags			IPS FHIR
-//	@Accept			json
-//	@Produce		json
-//
-//	@Security		ApiKeyAuth
-//
-//	@Param			data	body		VhlGetRequest	true	"Data parameters"
-//
-//	@Success		200		{object}	any
-//	@Failure		400
-//	@Failure		404
-//	@Failure		500
-//	@Router			/qr/fetch [post]
+// Get IPS Bundle using a valid VHL QR.
 func (vh *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	// TODO throw correct error body
 	var body VhlGetRequest
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		log.Printf("JSON Decode Error: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -154,6 +124,7 @@ func (vh *Handler) Get(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		} else {
+			log.Printf("Service Layer Error: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 
 		}
@@ -174,22 +145,6 @@ func (vh *Handler) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 // Validate ICVP data for ICVP that dont come from a IPS
-//
-//	@Summary		Validate ICVP.
-//	@Description	Validate ICVP data. Usefull for ICVPs not linked to a IPS.
-//	@Tags			IPS FHIR
-//	@Accept			json
-//	@Produce		json
-//
-//	@Security		ApiKeyAuth
-//
-//	@Param			data	body		ICVPValidateRequest	true	"Data parameters"
-//
-//	@Success		200		{object}	any
-//	@Failure		400
-//	@Failure		404
-//	@Failure		500
-//	@Router			/qr/validate [post]
 func (vh *Handler) Validate(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -199,6 +154,7 @@ func (vh *Handler) Validate(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	fmt.Printf("[DEBUG] /qr/validate request received data_len=%d\n", len(body.Data))
 
 	icvpValidationResponseData, err := vh.Service.GetICVPValidation(ctx, body.Data)
 	if err != nil {

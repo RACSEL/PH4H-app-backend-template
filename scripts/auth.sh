@@ -81,20 +81,17 @@ logout() {
     echo "Could not find refresh token, cannot logout"
     exit 1
   fi
-  RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+  RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
         -H "Content-Type: application/x-www-form-urlencoded" \
-        -d "client_id=$KEYCLOAK_CLIENT" \
+        -d "client_id=$KEYCLOAK_CLIENT_ID" \
         -d "refresh_token=$REFRESH_TOKEN" \
         "$LOGOUT_ENDPOINT")
-  if [ "$RESPONSE" -eq 204 ]; then
+  HTTP_CODE=${RESPONSE:0-3}
+  if [ "$HTTP_CODE" -eq 204 ]; then
       echo "Success: Logout successful. The refresh token has been invalidated."
       exit 0
-  elif [ "$RESPONSE" -eq 400 ]; then
-      echo "Error: Bad Request (400). The refresh token was likely invalid or already revoked."
-  elif [ "$RESPONSE" -eq 401 ]; then
-      echo "Error: Unauthorized (401). Check if your KEYCLOAK_CLIENT_SECRET is correct."
   else
-      echo "Error: An unexpected error occurred. Keycloak responded with HTTP status $RESPONSE."
+      echo ${RESPONSE:0:-3}
   fi
   exit 1
 }

@@ -18,18 +18,31 @@ import (
 )
 
 type IpsService struct {
-	Repository *client.IpsClient
+	DefaultRepository *client.IpsClient
+	Repositories      map[string]*client.IpsClient
 }
 
 func NewService(r *client.IpsClient) IpsService {
 	return IpsService{
-		Repository: r,
+		DefaultRepository: r,
+		Repositories:      make(map[string]*client.IpsClient),
 	}
+}
+
+func (is *IpsService) getClient(ctx context.Context) *client.IpsClient {
+	nodeName := authMiddleware.GetNodeNameFromContext(ctx)
+	if nodeName != "" {
+		if repo, ok := is.Repositories[nodeName]; ok {
+			return repo
+		}
+	}
+	return is.DefaultRepository
 }
 
 func (is *IpsService) GetIps(ctx context.Context) (map[string]interface{}, error) {
 	userId, err := authMiddleware.GetUserDocIDFromContext(ctx)
 	if err != nil {
+		slog.Error("User identifier not found in context", "error", err)
 		return nil, &customErrors.HttpError{
 			StatusCode: 401,
 			Body:       []map[string]interface{}{{"error": "user_identifier_not_found", "message": "User identifier not found in request context"}},
@@ -37,25 +50,32 @@ func (is *IpsService) GetIps(ctx context.Context) (map[string]interface{}, error
 		}
 	}
 
-	bundle, err := is.Repository.GetDocumentReference(userId)
+	slog.Info("Fetching IPS for user", "userId", userId)
+	repo := is.getClient(ctx)
+	bundle, err := repo.GetDocumentReference(userId)
 	if err != nil {
-		fmt.Printf("Error fetching document reference: %v\n", err)
+		slog.Error("Error fetching document reference", "userId", userId, "error", err)
 		return nil, err
 	}
 	entries := bundle.Entry
 	if len(entries) == 0 {
+		slog.Warn("No IPS found for user", "userId", userId)
 		return nil, &customErrors.HttpError{
 			StatusCode: 404,
 			Body:       []map[string]interface{}{{"error": "not_found", "message": "No IPS found for the user"}},
 			Err:        fmt.Errorf("no IPS found for the user"),
 		}
 	}
+	slog.Info("Found DocumentReferences for user", "userId", userId, "count", len(entries))
 	sort.Slice(entries, func(i, j int) bool {
 		return entries[i].Resource.Meta.LastUpdated > entries[j].Resource.Meta.LastUpdated
 	})
 
-	ipsBundle, err := is.Repository.GetIpsBundle(entries[0].Resource.Content[0].Attachment.URL)
+	ipsUrl := entries[0].Resource.Content[0].Attachment.URL
+	slog.Info("Fetching IPS bundle", "userId", userId, "url", ipsUrl)
+	ipsBundle, err := repo.GetIpsBundle(entries[0].Resource.Content[0].Attachment.URL)
 	if err != nil {
+		slog.Error("Error fetching IPS bundle", "userId", userId, "url", ipsUrl, "error", err)
 		return nil, err
 	}
 
@@ -64,7 +84,8 @@ func (is *IpsService) GetIps(ctx context.Context) (map[string]interface{}, error
 }
 
 func (is *IpsService) GetIpsICVP(ctx context.Context, idBundle string, immunizationId *string) (string, error) {
-	result, err := is.Repository.GetIpsICVP(idBundle, immunizationId)
+	repo := is.getClient(ctx)
+	result, err := repo.GetIpsICVP(idBundle, immunizationId)
 	if err != nil {
 		return "", err
 	}
@@ -147,43 +168,44 @@ func removeDuplicates(entries []Entry) []Entry {
 func findCountryInBundle(bundle Bundle) string {
 	for _, entry := range bundle.Entry {
 		if entry.Resource == nil {
-			slog.Warn("No resource found in bundle: ", entry.FullURL)
+			slog.Warn("No resource found in bundle", "url", entry.FullURL)
 			continue
 		}
 
+
 		rtype, ok := entry.Resource["resourceType"]
 		if !ok || rtype == nil || rtype != "Organization" {
-			slog.Warn("Resource type  is not an Organization: ", entry.FullURL)
+			slog.Warn("Resource type is not an Organization", "url", entry.FullURL)
 			continue
 		}
 
 		addressEntry, ok := entry.Resource["address"]
 		if !ok || addressEntry == nil {
-			slog.Warn("Resource has has noo Address: ", entry.FullURL)
+			slog.Warn("Resource has no Address", "url", entry.FullURL)
 			continue
 		}
 
 		addresses, ok := entry.Resource["address"].([]interface{})
 		if !ok || len(addresses) == 0 {
-			slog.Warn("Resource has no address: ", entry.FullURL)
+			slog.Warn("Resource has no address", "url", entry.FullURL)
 			continue
 		}
 
 		address, ok := addresses[0].(map[string]interface{})
 		if !ok || address == nil {
-			slog.Warn("Resource address is not a map: ", entry.FullURL)
+			slog.Warn("Resource address is not a map", "url", entry.FullURL)
 			continue
 		}
 
 		country, ok := address["country"]
 		if !ok || country == nil {
-			slog.Warn("Resource address has no country: ", entry.FullURL)
+			slog.Warn("Resource address has no country", "url", entry.FullURL)
 			continue
 		}
 
 		countryCode, ok := country.(string)
 		if !ok {
-			slog.Warn("Resource country is not a string: ", entry.FullURL)
+			slog.Warn("Resource country is not a string", "url", entry.FullURL)
 			continue
 		}
 		return countryCode
@@ -195,9 +217,10 @@ func findOrganizationEntries(bundle Bundle) []Entry {
 	var entries []Entry
 	for _, entry := range bundle.Entry {
 		if entry.Resource == nil {
-			slog.Warn("No resource found in bundle: ", entry.FullURL)
+			slog.Warn("No resource found in bundle", "url", entry.FullURL)
 			continue
 		}
+
 
 		rtype, ok := entry.Resource["resourceType"]
 		if !ok || rtype == nil || rtype != "Organization" {

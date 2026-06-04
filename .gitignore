@@ -12,3 +12,6 @@ content-generator
 templates
 out
 debugger
+
+node-services.json
+.DS_Store
