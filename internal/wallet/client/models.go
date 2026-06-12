@@ -5,6 +5,7 @@ type CredentialType string
 const (
 	VerifiableHealthLink CredentialType = "VerifiableHealthLink"
 	ICVP                 CredentialType = "ICVP"
+	MEOW                 CredentialType = "MEOW"
 )
 
 // GenerateWalletLinkRequest represents the request body for generating a wallet link.

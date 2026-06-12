@@ -33,8 +33,8 @@ func (h *Handler) GenerateWalletLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if reqBody.CredentialType != client.VerifiableHealthLink && reqBody.CredentialType != client.ICVP {
-		http.Error(w, `{"error": "invalid_credential_type", "message": "credentialType must be either VerifiableHealthLink or ICVP"}`, http.StatusBadRequest)
+	if reqBody.CredentialType != client.VerifiableHealthLink && reqBody.CredentialType != client.ICVP && reqBody.CredentialType != client.MEOW {
+		http.Error(w, `{"error": "invalid_credential_type", "message": "credentialType must be one of VerifiableHealthLink, ICVP, or MEOW"}`, http.StatusBadRequest)
 		return
 	}
 

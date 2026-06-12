@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	errors2 "ips-lacpass-backend/pkg/errors"
+	"ips-lacpass-backend/pkg/utils"
 	"net/http"
 )
 
@@ -15,6 +16,11 @@ type ServiceAdapter interface {
 }
 type Handler struct {
 	Service ServiceAdapter
+}
+
+type MEOWDataResponse struct {
+	Data    string                 `json:"data"`
+	Payload map[string]interface{} `json:"payload"`
 }
 
 func NewHandler(service ServiceAdapter) *Handler {
@@ -99,9 +105,15 @@ func (h *Handler) GetMeow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := json.Marshal(map[string]string{
-		"data": ips,
-	})
+	decodedPayload, err := utils.DecodeHCert(ips)
+	if err != nil {
+		fmt.Printf("[medications/meow error] failed to decode hcert bundleId=%s error=%v\n", bundleId, err)
+		http.Error(w, "Failed to decode hcert", http.StatusInternalServerError)
+		return
+	}
+
+	response := MEOWDataResponse{Data: ips, Payload: decodedPayload}
+	res, err := json.Marshal(response)
 	if err != nil {
 		fmt.Printf("[medications/meow error] failed to encode success response bundleId=%s error=%v\n", bundleId, err)
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)

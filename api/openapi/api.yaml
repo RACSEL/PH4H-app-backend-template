@@ -788,7 +788,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ICVPResponse'
+                $ref: '#/components/schemas/MEOWResponse'
         "400":
           description: Bad Request
           content:
@@ -1106,6 +1106,60 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/GenerateWalletLinkRequest'
+            examples:
+              VerifiableHealthLink:
+                summary: Verifiable Health Link wallet credential
+                value:
+                  credentialType: VerifiableHealthLink
+                  claims:
+                    "1": "XJ"
+                    "4": 1760140221
+                    "6": 1757271643804
+                    "-260":
+                      "5":
+                        - u: "shlink://eyJ1cmwiOiJodHRwOi8vbGFjcGFzcy5jcmVhdGUuY2w6ODE4Mi92Mi9tYW5pZmVzdHMvYjEzYzA0Y2QtMDc1Yy00YjY4LTgyOTQtMzJhZTMwN2YxYjA5IiwiZmxhZyI6IlAiLCJleHAiOjE3NjAxNDAyMjEwMDAsImtleSI6IkxTTnVaTXFHZEo1cmdQLUpJSEoySllLaWtuYzJXZDcwaG1VMFBSZFAwSHM9IiwibGFiZWwiOiJHREhDTiBWYWxpZGF0b3IifQ=="
+              ICVP:
+                summary: ICVP wallet credential
+                value:
+                  credentialType: ICVP
+                  claims:
+                    "1": "XCL"
+                    "6": 1757187943
+                    "-260":
+                      "-6":
+                        dob: "1905-08-23"
+                        n: "Aulo Agerio"
+                        ndt: "NI"
+                        nid: "16337361-9"
+                        s: "male"
+                        v:
+                          bo: "123123123"
+                          dt: "2017-12-11"
+                          vls: "2017-12-11"
+                          vp: "YellowFeverProductd2c75a15ed309658b3968519ddb31690"
+              MEOW:
+                summary: Medication overview wallet credential
+                value:
+                  credentialType: MEOW
+                  claims:
+                    "1": "XX"
+                    "4": 1800000000
+                    "6": 1700000000
+                    "-260":
+                      "-7":
+                        n: "Alex Rivera"
+                        dob: "1988-04-12"
+                        s: "male"
+                        id: "99999999-9"
+                        dt: "NI"
+                        m:
+                          - m: "376834005"
+                            es: "2025-01-01"
+                            ee: "2025-12-31"
+                            da: "2025-06-17"
+                            d: "20 mg daily"
+                            r: "Hypercholesterolemia"
+                            a: "taking"
       responses:
         "200":
           description: OK
@@ -1113,6 +1167,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenerateWalletLinkResponse'
+              example:
+                coUrl: "https://wallet.example.com/claim/123"
+                location: "openid-credential-offer://?credential_offer_uri=https%3A%2F%2Fwallet.example.com%2Fclaim%2F123"
+                preAuthorizedCode: "a7b8c9d0e1f2"
+                qrUrl: "https://api.example.com/v1/qr/123.png"
         "400":
           description: Bad Request
           content:
@@ -1740,6 +1799,7 @@ components:
       enum:
         - VerifiableHealthLink
         - ICVP
+        - MEOW
       example: "VerifiableHealthLink"
     GenerateWalletLinkResponse:
       type: object
@@ -1749,7 +1809,7 @@ components:
           example: "https://wallet.example.com/claim/123"
         location:
           type: string
-          example: "https://api.example.com/v1/wallet/123"
+          example: "openid-credential-offer://?credential_offer_uri=https%3A%2F%2Fwallet.example.com%2Fclaim%2F123"
         preAuthorizedCode:
           type: string
           example: "a7b8c9d0e1f2"
@@ -1779,6 +1839,34 @@ components:
           example:
             issuer: "Ministry of Health"
             valid_until: "2027-05-03"
+    MEOWResponse:
+      type: object
+      properties:
+        data:
+          type: string
+          example: "HC1:MEOW-CERTIFICATE-DATA"
+        payload:
+          type: object
+          additionalProperties: true
+          example:
+            "1": "XX"
+            "4": 1800000000
+            "6": 1700000000
+            "-260":
+              "-7":
+                n: "Alex Rivera"
+                dob: "1988-04-12"
+                s: "male"
+                id: "99999999-9"
+                dt: "NI"
+                m:
+                  - m: "376834005"
+                    es: "2025-01-01"
+                    ee: "2025-12-31"
+                    da: "2025-06-17"
+                    d: "20 mg daily"
+                    r: "Hypercholesterolemia"
+                    a: "taking"
     ICVPValidateRequest:
       type: object
       properties:
