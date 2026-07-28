@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"ips-lacpass-backend/internal/wallet/cache"
 	"ips-lacpass-backend/internal/wallet/client"
 )
 
@@ -16,7 +17,8 @@ func NewService(r *client.WalletClient) WalletService {
 }
 
 func (ws *WalletService) GenerateWalletLink(ctx context.Context, claims map[string]interface{}, credentialType client.CredentialType) (*client.GenerateWalletLinkResponse, error) {
-	walletResponse, err := ws.Repository.GenerateWalletLink(ctx, claims, credentialType)
+	raw, _ := cache.Get(claims)
+	walletResponse, err := ws.Repository.GenerateWalletLink(ctx, claims, credentialType, raw)
 	if err != nil {
 		return nil, err
 	}

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"ips-lacpass-backend/internal/ips/core"
+	walletCache "ips-lacpass-backend/internal/wallet/cache"
 	errors2 "ips-lacpass-backend/pkg/errors"
 	"ips-lacpass-backend/pkg/utils"
 	"log/slog"
@@ -138,6 +139,7 @@ func (ih *Handler) GetICVP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to decode hcert", http.StatusInternalServerError)
 		return
 	}
+	walletCache.Set(decodedPayload, icvp)
 
 	response := ICVPDataResponse{Data: icvp, Payload: decodedPayload}
 	res, err := json.Marshal(response)

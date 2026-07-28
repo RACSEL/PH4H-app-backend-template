@@ -13,6 +13,7 @@ type GenerateWalletLinkRequest struct {
 	Claims         map[string]interface{} `json:"claims"`
 	CredentialType CredentialType         `json:"credentialType"`
 	PinRequired    bool                   `json:"pinRequired"`
+	Raw            string                 `json:"raw,omitempty"`
 }
 
 // GenerateWalletLinkResponse represents the response from the wallet service.
