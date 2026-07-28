@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"ips-lacpass-backend/pkg/errors"
@@ -12,7 +13,7 @@ import (
 )
 
 type ClientInterface interface {
-	GenerateWalletLink(ctx context.Context, claims map[string]interface{}) (*GenerateWalletLinkResponse, error)
+	GenerateWalletLink(ctx context.Context, claims map[string]interface{}, credentialType CredentialType, raw string) (*GenerateWalletLinkResponse, error)
 }
 
 type WalletClient struct {
@@ -34,13 +35,19 @@ func NewClient(baseURL string, identifier string, apiKey string) WalletClient {
 	}
 }
 
-func (c *WalletClient) GenerateWalletLink(ctx context.Context, claims map[string]interface{}, credentialType CredentialType) (*GenerateWalletLinkResponse, error) {
+func (c *WalletClient) GenerateWalletLink(ctx context.Context, claims map[string]interface{}, credentialType CredentialType, raw string) (*GenerateWalletLinkResponse, error) {
 	url := fmt.Sprintf("%s/credentials/%s", c.BaseURL, c.Identifier)
+
+	encodedRaw := ""
+	if raw != "" {
+		encodedRaw = base64.StdEncoding.EncodeToString([]byte(raw))
+	}
 
 	reqBody := GenerateWalletLinkRequest{
 		Claims:         claims,
 		CredentialType: credentialType,
 		PinRequired:    false,
+		Raw:            encodedRaw,
 	}
 
 	body, err := json.Marshal(reqBody)
@@ -63,6 +70,8 @@ func (c *WalletClient) GenerateWalletLink(ctx context.Context, claims map[string
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("x-api-key", c.APIKey)
+
+	fmt.Printf("[DEBUG] wallet request url=%s body=%s\n", url, string(body))
 
 	resp, err := c.Client.Do(req)
 	if err != nil {

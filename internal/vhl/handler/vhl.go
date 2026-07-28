@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"ips-lacpass-backend/internal/vhl/core"
+	walletCache "ips-lacpass-backend/internal/wallet/cache"
 	customErrors "ips-lacpass-backend/pkg/errors"
 	"ips-lacpass-backend/pkg/utils"
 	"log"
@@ -78,6 +79,8 @@ func (vh *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	decodedPayload, err := utils.DecodeHCert(qr.Value)
 	if err != nil {
 		fmt.Println("Failed to decode hcert: ", err)
+	} else {
+		walletCache.Set(decodedPayload, qr.Value)
 	}
 
 	res, err := json.Marshal(&VhlResponse{

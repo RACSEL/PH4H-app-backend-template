@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	walletCache "ips-lacpass-backend/internal/wallet/cache"
 	errors2 "ips-lacpass-backend/pkg/errors"
 	"ips-lacpass-backend/pkg/utils"
 	"net/http"
@@ -111,6 +112,7 @@ func (h *Handler) GetMeow(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to decode hcert", http.StatusInternalServerError)
 		return
 	}
+	walletCache.Set(decodedPayload, ips)
 
 	response := MEOWDataResponse{Data: ips, Payload: decodedPayload}
 	res, err := json.Marshal(response)
